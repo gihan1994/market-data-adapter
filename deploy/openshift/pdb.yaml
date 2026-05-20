@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: market-data-service-pdb
+spec:
+  # We want at most ONE pod down at a time during voluntary disruption
+  # (otherwise we risk losing both warm-eligible pods simultaneously,
+  # which would force a cold-pod promotion with longer failover).
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: market-data-service

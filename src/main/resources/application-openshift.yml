@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP}
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-512
+      sasl.jaas.config: ${KAFKA_SASL_JAAS}
+
+redis:
+  cluster-enabled: true
+  cluster-nodes: ${REDIS_CLUSTER_NODES}
+  password: ${REDIS_PASSWORD}
+
+marketdata:
+  pod:
+    role: ${POD_ROLE}        # injected from StatefulSet: ordinal 0,1 = warm-eligible; 2,3 = cold-only
+    name: ${POD_NAME}        # injected via downwardAPI: metadata.name
+  lseg:
+    mock-mode: false
+
+logging:
+  level:
+    com.example.marketdata: INFO

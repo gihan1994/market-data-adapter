@@ -1,0 +1,17 @@
+package com.example.marketdata.domain;
+
+public enum AuditEventType {
+    POD_STARTED,
+    LEADER_ACQUIRED,
+    LEADER_LOST,
+    LSEG_CONNECTED,
+    LSEG_DISCONNECTED,
+    RIC_SUBSCRIBED,
+    RIC_UNSUBSCRIBED,
+    RIC_STATE_CHANGED,
+    RIC_ERROR,
+    GAP_DETECTED,
+    GAP_PUBLISHED,
+    TOKEN_REFRESHED,
+    POD_TERMINATING
+}

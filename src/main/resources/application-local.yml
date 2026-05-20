@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/marketdata}
+    username: ${DB_USER:marketdata}
+    password: ${DB_PASSWORD:marketdata}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+
+redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+
+marketdata:
+  pod:
+    role: ${POD_ROLE:warm-eligible}
+    name: ${POD_NAME:local-pod-0}
+  lseg:
+    mock-mode: ${LSEG_MOCK:true}
+
+logging:
+  level:
+    com.example.marketdata: DEBUG

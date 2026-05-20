@@ -1,0 +1,141 @@
+spring:
+  application:
+    name: market-data-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/marketdata}
+    username: ${DB_USER:marketdata}
+    password: ${DB_PASSWORD:marketdata}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 5000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    producer:
+      acks: all
+      retries: 10
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
+        linger.ms: 5
+        compression.type: lz4
+        transactional.id: ${POD_NAME:market-data-tx}-tx
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: market-data-adapter
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        isolation.level: read_committed
+        spring.json.trusted.packages: "com.example.marketdata.*"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+    listener:
+      ack-mode: manual_immediate
+      concurrency: 1
+
+# Redisson is configured via application properties or yaml/json under redisson:
+# We bind via RedissonConfig.java for finer control
+redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  cluster-enabled: ${REDIS_CLUSTER:false}
+  cluster-nodes: ${REDIS_CLUSTER_NODES:}
+
+# ----- Application-specific config -----
+marketdata:
+  pod:
+    # Set per-pod from env. Values: warm-eligible | cold-only
+    role: ${POD_ROLE:warm-eligible}
+    # OpenShift downward-api: metadata.name
+    name: ${POD_NAME:local-pod}
+
+  leader:
+    lock-key: marketdata:leader:lock
+    lock-ttl-seconds: 5
+    heartbeat-seconds: 2
+    acquire-retry-seconds: 1
+
+  lseg:
+    # RTO V2 OAuth2 — store secret in OpenShift Secret
+    client-id: ${LSEG_CLIENT_ID:}
+    client-secret: ${LSEG_CLIENT_SECRET:}
+    token-url: ${LSEG_TOKEN_URL:https://api.refinitiv.com/auth/oauth2/v2/token}
+    scope: trapi
+    ema-config-file: classpath:EmaConfig.xml
+    consumer-name: Consumer_1
+    service-name: ELEKTRON_DD
+    # If true, skip actually connecting to LSEG (useful for local dev / unit tests)
+    mock-mode: ${LSEG_MOCK:false}
+
+  subscription:
+    drain-grace-seconds: 30
+    batch-resubscribe-size: 100
+    refcount-key-prefix: "marketdata:subscription:refcount:"
+    active-rics-key: "marketdata:ric:active"
+    price-key-prefix: "marketdata:ric:price:"
+    last-published-key-prefix: "marketdata:ric:last-published:"
+    price-ttl-seconds: 60
+
+  kafka:
+    topic-requests: market-data-requests
+    topic-updates: market-data-updates
+    topic-control: market-data-control
+
+  recovery:
+    gap-threshold-millis: 2000
+    snapshot-on-recovery: true
+
+# ----- Actuator -----
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,env
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:when-authorized}
+      show-components: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[lseg.tick.latency]": true
+    tags:
+      application: ${spring.application.name}
+      pod: ${marketdata.pod.name}
+
+logging:
+  level:
+    com.example.marketdata: INFO
+    com.refinitiv: WARN
+    org.springframework.kafka: INFO

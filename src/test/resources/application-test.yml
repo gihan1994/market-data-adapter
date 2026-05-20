@@ -1,0 +1,30 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+
+marketdata:
+  pod:
+    role: warm-eligible
+    name: test-pod-0
+  leader:
+    lock-ttl-seconds: 3
+    heartbeat-seconds: 1
+    acquire-retry-seconds: 1
+  lseg:
+    mock-mode: true
+    client-id: test
+    client-secret: test
+  subscription:
+    drain-grace-seconds: 2
+
+logging:
+  level:
+    com.example.marketdata: DEBUG
+    org.springframework.kafka: WARN
+    com.refinitiv: ERROR

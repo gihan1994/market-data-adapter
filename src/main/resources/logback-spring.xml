@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="market-data-service"/>
+    <springProperty scope="context" name="podName" source="marketdata.pod.name" defaultValue="local-pod"/>
+
+    <!-- Plain text appender for local dev -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level [%X{ric:-}] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- JSON appender for OpenShift (consumed by Fluent Bit / Loki) -->
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app":"${appName}","pod":"${podName}"}</customFields>
+            <includeMdcKeyName>ric</includeMdcKeyName>
+            <includeMdcKeyName>requester</includeMdcKeyName>
+            <includeMdcKeyName>leaderRole</includeMdcKeyName>
+        </encoder>
+    </appender>
+
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="openshift">
+        <root level="INFO">
+            <appender-ref ref="JSON"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.example.marketdata" level="DEBUG"/>
+    </springProfile>
+
+</configuration>
