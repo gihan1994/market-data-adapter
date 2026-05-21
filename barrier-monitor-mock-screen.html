@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LCM | Life Cycle Management — American Barrier Monitor</title>
+  <style>
+    /* ══════════════════════════════════════════════
+       THEME TOKENS
+    ══════════════════════════════════════════════ */
+    :root {
+      --accent:          #2563EB;
+      --accent-dark:     #1D4ED8;
+      --accent-light:    rgba(37,99,235,0.08);
+
+      --bg-app:          #EFF1F5;
+      --bg-card:         #FFFFFF;
+      --bg-sidebar:      #12172B;
+      --bg-header:       #FFFFFF;
+      --bg-table-head:   #F7F8FA;
+      --bg-hover:        #F3F4F6;
+      --bg-input:        #FFFFFF;
+
+      --text-primary:    #0F1628;
+      --text-secondary:  #6B7280;
+      --text-muted:      #9CA3AF;
+      --text-sidebar:    #8892A4;
+      --text-nav-active: #FFFFFF;
+
+      --border:          #E5E7EB;
+      --border-strong:   #D1D5DB;
+
+      --shadow-sm:  0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:  0 4px 12px rgba(0,0,0,.08);
+      --shadow-lg:  0 8px 24px rgba(0,0,0,.10);
+
+      --green:    #10B981;
+      --amber:    #F59E0B;
+      --red-alt:  #EF4444;
+      --breach:   #DC2626;
+      --blue:     #3B82F6;
+      --purple:   #8B5CF6;
+
+      --sidebar-w: 232px;
+      --header-h:  58px;
+    }
+
+    [data-theme="dark"] {
+      --bg-app:         #0B0E1A;
+      --bg-card:        #161929;
+      --bg-sidebar:     #0B0E1A;
+      --bg-header:      #161929;
+      --bg-table-head:  #1D2136;
+      --bg-hover:       #1D2136;
+      --bg-input:       #1D2136;
+
+      --text-primary:   #E8EAF0;
+      --text-secondary: #8892A4;
+      --text-muted:     #4A5568;
+      --text-sidebar:   #6B7890;
+      --text-nav-active:#FFFFFF;
+
+      --border:         #232840;
+      --border-strong:  #2D3555;
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,.5);
+    }
+
+    /* ══════════════════════════════════════════════
+       RESET & BASE
+    ══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow: hidden;
+      height: 100vh;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ══════════════════════════════════════════════
+       LAYOUT SHELL
+    ══════════════════════════════════════════════ */
+    .shell { display: flex; height: 100vh; }
+
+    /* ──────────────── SIDEBAR ──────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.04);
+      z-index: 200;
+    }
+
+    .sidebar-brand {
+      padding: 18px 16px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 900; color: #fff;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.40);
+    }
+
+    .brand-name { font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: 0.5px; }
+    .brand-sub  { font-size: 9px;  font-weight: 600; color: #3D4A60; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 1px; }
+
+    .sidebar-section { padding: 16px 10px 6px; }
+
+    .sidebar-section-label {
+      font-size: 9.5px; font-weight: 700;
+      color: #3A4560;
+      text-transform: uppercase; letter-spacing: 1.3px;
+      padding: 0 8px; margin-bottom: 4px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: 8px;
+      color: var(--text-sidebar);
+      cursor: pointer; font-size: 12.5px; font-weight: 500;
+      transition: all 0.15s; margin-bottom: 1px;
+      position: relative;
+    }
+    .nav-item:hover  { background: rgba(255,255,255,0.04); color: #CBD5E1; }
+    .nav-item.active { background: rgba(37,99,235,0.16); color: #fff; }
+    .nav-item.active .ni-icon { color: var(--accent); }
+
+    .ni-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent); color: #fff;
+      font-size: 9px; font-weight: 800;
+      padding: 2px 5px; border-radius: 8px; min-width: 18px; text-align: center;
+    }
+    .nav-badge.amber { background: var(--amber); }
+    .nav-badge.red   { background: var(--breach); }
+
+    .sidebar-hr { height: 1px; background: rgba(255,255,255,0.04); margin: 6px 10px; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 10px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .user-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 8px; border-radius: 8px; cursor: pointer;
+    }
+    .user-row:hover { background: rgba(255,255,255,0.04); }
+
+    .user-av {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent);
+      color: #fff; font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .user-name  { font-size: 12px; font-weight: 600; color: #CBD5E1; }
+    .user-role  { font-size: 10px; color: #3D4A60; }
+    .user-more  { margin-left: auto; color: #3D4A60; font-size: 16px; }
+
+    /* ──────────────── MAIN PANEL ──────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    /* HEADER */
+    .header {
+      height: var(--header-h);
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 22px; gap: 14px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hdr-title { font-size: 15px; font-weight: 700; }
+    .hdr-crumb { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+    .hdr-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+
+    .live-pill {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; color: var(--green);
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green);
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .conn-pill {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; color: var(--green);
+    }
+    .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+    .hdr-time { font-size: 11px; color: var(--text-secondary); }
+    .hdr-time strong { color: var(--text-primary); font-family: 'Courier New', monospace; }
+
+    .icon-btn {
+      width: 34px; height: 34px;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text-secondary);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 15px; transition: all 0.15s; position: relative;
+    }
+    .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .badge-dot {
+      position: absolute; top: -3px; right: -3px;
+      width: 15px; height: 15px;
+      background: var(--breach); color: #fff;
+      border-radius: 50%; font-size: 8px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--bg-header);
+    }
+
+    .theme-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-secondary); cursor: pointer; font-size: 11px; font-weight: 600;
+      transition: all 0.15s;
+    }
+    .theme-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    /* CONTENT */
+    .content {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 18px 22px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+
+    /* ──────────────── KPI ROW ──────────────── */
+    .kpi-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      position: relative; overflow: hidden;
+    }
+    .kpi-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 12px 12px 0 0;
+    }
+    .kpi-card.k-accent::after { background: var(--accent); }
+    .kpi-card.k-red::after    { background: var(--breach); }
+    .kpi-card.k-amber::after  { background: var(--amber); }
+    .kpi-card.k-green::after  { background: var(--green); }
+    .kpi-card.k-blue::after   { background: var(--blue); }
+    .kpi-card.k-purple::after { background: var(--purple); }
+
+    .kpi-label  { font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+    .kpi-value  { font-size: 30px; font-weight: 900; line-height: 1; }
+    .kpi-sub    { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+    .kpi-tag    {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 10px; font-weight: 700; margin-top: 6px;
+    }
+    .kpi-tag.up { background: rgba(16,185,129,.12); color: var(--green); }
+    .kpi-tag.dn { background: rgba(220,38,38,.12);  color: var(--breach); }
+    .kpi-tag.wn { background: rgba(245,158,11,.12); color: var(--amber); }
+
+    /* ──────────────── BODY GRID ──────────────── */
+    .body-grid { display: grid; grid-template-columns: 1fr 320px; gap: 18px; }
+    .col-main   { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .col-side   { display: flex; flex-direction: column; gap: 18px; }
+
+    /* ──────────────── CARD ──────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-icon  { font-size: 15px; }
+    .card-title { font-size: 13px; font-weight: 700; }
+    .card-sub   { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+    .card-actions { margin-left: auto; display: flex; align-items: center; gap: 7px; }
+
+    /* ──────────────── BUTTONS ──────────────── */
+    .btn {
+      padding: 5px 11px; border-radius: 6px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-secondary); transition: all 0.15s;
+    }
+    .btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .btn.prim  { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.prim:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+    /* ──────────────── RATE GRID ──────────────── */
+    .rate-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 1px; background: var(--border);
+    }
+
+    .rate-cell {
+      background: var(--bg-card);
+      padding: 13px 15px; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .rate-cell:hover { background: var(--bg-hover); }
+
+    .rc-pair { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; }
+    .rc-bid  { font-size: 19px; font-weight: 900; font-family: 'Courier New', monospace; letter-spacing: -0.5px; }
+    .rc-ask  { font-size: 12px; color: var(--text-secondary); font-family: monospace; }
+    .rc-meta { display: flex; justify-content: space-between; margin-top: 3px; }
+    .rc-spd  { font-size: 10px; color: var(--text-muted); }
+    .rc-chg  { font-size: 10.5px; font-weight: 700; }
+    .chg-up  { color: var(--green); }
+    .chg-dn  { color: var(--red-alt); }
+
+    .src-tag {
+      display: inline-block; padding: 1px 5px; border-radius: 3px;
+      font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px;
+    }
+    .src-lseg { background: rgba(245,158,11,.10); color: #B45309; }
+    .src-rtds { background: rgba(59,130,246,.10);  color: var(--blue); }
+    .src-int  { background: rgba(139,92,246,.10);  color: var(--purple); }
+
+    .rate-flash    { animation: rflash   0.45s ease; }
+    .rate-flash-dn { animation: rflashdn 0.45s ease; }
+    @keyframes rflash   { 0%{ background: rgba(16,185,129,0.18) } 100%{ background: transparent } }
+    @keyframes rflashdn { 0%{ background: rgba(239,68,68,0.14)  } 100%{ background: transparent } }
+
+    /* ──────────────── FILTER BAR ──────────────── */
+    .filter-bar {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+
+    .search-box {
+      padding: 6px 11px; border-radius: 7px;
+      border: 1px solid var(--border); background: var(--bg-input);
+      color: var(--text-primary); font-size: 12px; width: 190px;
+      outline: none;
+    }
+    .search-box:focus { border-color: var(--accent); }
+
+    .sel {
+      padding: 5px 9px; border-radius: 7px;
+      border: 1px solid var(--border); background: var(--bg-input);
+      color: var(--text-primary); font-size: 11.5px; cursor: pointer;
+      outline: none;
+    }
+
+    .chip {
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-secondary); transition: all 0.15s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.on { background: var(--accent-light); border-color: rgba(37,99,235,.3); color: var(--accent); }
+
+    /* ──────────────── BARRIER TABLE ──────────────── */
+    .tbl-wrap { overflow-x: auto; }
+
+    .btable {
+      width: 100%; border-collapse: collapse; font-size: 12px;
+    }
+    .btable th {
+      background: var(--bg-table-head);
+      padding: 9px 13px;
+      text-align: left; font-size: 9.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    .btable th:hover { color: var(--text-primary); }
+    .btable td {
+      padding: 10px 13px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .btable tr:last-child td { border-bottom: none; }
+    .btable tr:hover td { background: var(--bg-hover); }
+
+    .btable tr.row-breach td       { background: rgba(220,38,38,.03); }
+    .btable tr.row-breach:hover td { background: rgba(220,38,38,.06); }
+    .btable tr.row-warn td         { background: rgba(245,158,11,.03); }
+    .btable tr.row-warn:hover td   { background: rgba(245,158,11,.06); }
+
+    .mono { font-family: 'Courier New', monospace; font-weight: 700; }
+
+    /* barrier type chips */
+    .bt-chip { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 9.5px; font-weight: 800; letter-spacing: 0.3px; }
+    .bt-uio  { background: rgba(239,68,68,.10);  color: var(--red-alt); }
+    .bt-uii  { background: rgba(59,130,246,.10); color: var(--blue); }
+    .bt-dio  { background: rgba(245,158,11,.10); color: var(--amber); }
+    .bt-dii  { background: rgba(16,185,129,.10); color: var(--green); }
+
+    /* status pills */
+    .spill      { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .sp-green   { background: rgba(16,185,129,.12);  color: var(--green); }
+    .sp-amber   { background: rgba(245,158,11,.12);  color: var(--amber); }
+    .sp-red     { background: rgba(239,68,68,.12);   color: var(--red-alt); }
+    .sp-breach  { background: rgba(220,38,38,.12);   color: var(--breach); }
+    .sp-purple  { background: rgba(139,92,246,.12);  color: var(--purple); }
+
+    /* distance bar */
+    .dist-wrap { display: flex; align-items: center; gap: 7px; }
+    .dist-bar  { flex: 1; min-width: 55px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .dist-fill { height: 100%; border-radius: 2px; transition: width .4s; }
+    .df-safe   { background: var(--green); }
+    .df-warn   { background: var(--amber); }
+    .df-dang   { background: var(--red-alt); }
+    .df-breach { background: var(--breach); }
+
+    /* murex event button */
+    .mx-btn  { padding: 3px 9px; border-radius: 5px; font-size: 10px; font-weight: 800; cursor: pointer; border: none; }
+    .mx-trig { background: rgba(139,92,246,.14); color: var(--purple); }
+    .mx-pend { background: rgba(245,158,11,.14); color: var(--amber); }
+    .mx-none { background: var(--bg-table-head); color: var(--text-muted); }
+
+    /* pagination */
+    .pagination {
+      display: flex; align-items: center; gap: 5px;
+      padding: 11px 16px; border-top: 1px solid var(--border);
+    }
+    .pg-btn    { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .pg-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .pg-info   { font-size: 11px; color: var(--text-secondary); margin-left: auto; }
+
+    /* Murex strip */
+    .mx-strip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 16px; background: rgba(139,92,246,.05);
+      border-top: 1px solid rgba(139,92,246,.1);
+    }
+    .mx-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); animation: blink 2s infinite; }
+    .mx-txt { font-size: 11px; color: var(--text-secondary); }
+    .mx-txt strong { color: var(--purple); font-weight: 700; }
+
+    /* ──────────────── SIDE: ALERTS ──────────────── */
+    .alert-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 11px 16px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background 0.12s;
+    }
+    .alert-item:hover { background: var(--bg-hover); }
+    .alert-item:last-child { border-bottom: none; }
+
+    .al-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .al-crit { background: var(--breach); box-shadow: 0 0 5px rgba(220,38,38,.5); }
+    .al-warn { background: var(--amber); }
+    .al-info { background: var(--blue); }
+
+    .al-title { font-size: 11.5px; font-weight: 600; margin-bottom: 2px; }
+    .al-sub   { font-size: 10.5px; color: var(--text-secondary); line-height: 1.4; }
+    .al-time  { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ──────────────── SIDE: MUREX LOG ──────────────── */
+    .log-item {
+      display: flex; gap: 11px;
+      padding: 11px 16px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background 0.12s;
+    }
+    .log-item:hover { background: var(--bg-hover); }
+    .log-item:last-child { border-bottom: none; }
+
+    .log-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0;
+    }
+    .li-breach { background: rgba(220,38,38,.10); }
+    .li-murex  { background: rgba(139,92,246,.10); }
+    .li-warn   { background: rgba(245,158,11,.10); }
+    .li-rate   { background: rgba(59,130,246,.10); }
+    .li-ok     { background: rgba(16,185,129,.10); }
+
+    .log-title { font-size: 11.5px; font-weight: 700; margin-bottom: 2px; }
+    .log-desc  { font-size: 10.5px; color: var(--text-secondary); line-height: 1.4; }
+    .log-meta  { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+    /* ──────────────── SCROLLBAR ──────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+    .scroll-area { overflow-y: auto; max-height: 360px; }
+
+    /* ──────────────── STATUS BAR ──────────────── */
+    .status-bar {
+      height: 26px;
+      background: var(--bg-sidebar);
+      border-top: 1px solid rgba(255,255,255,0.04);
+      display: flex; align-items: center; gap: 20px;
+      padding: 0 16px;
+      font-size: 10px; color: #3D4A60;
+      flex-shrink: 0;
+    }
+    .sb-item { display: flex; align-items: center; gap: 5px; }
+    .sb-dot  { width: 5px; height: 5px; border-radius: 50%; }
+    .sb-dot.ok { background: var(--green); }
+    .sb-dot.wn { background: var(--amber); }
+    .sb-dot.rd { background: var(--breach); }
+
+    /* ──────────────── HELPERS ──────────────── */
+    .flex-center { display: flex; align-items: center; }
+    .gap-6  { gap: 6px; }
+    .ml-auto{ margin-left: auto; }
+    .fw-700 { font-weight: 700; }
+    .fw-800 { font-weight: 800; }
+    .fs-10  { font-size: 10px; }
+
+    .text-breach { color: var(--breach); }
+    .text-amber  { color: var(--amber); }
+    .text-green  { color: var(--green); }
+    .text-purple { color: var(--purple); }
+    .text-accent { color: var(--accent); }
+    .text-sec    { color: var(--text-secondary); }
+
+    .tag-am {
+      display: inline-block; padding: 2px 7px; border-radius: 4px;
+      font-size: 9px; font-weight: 800; letter-spacing: 0.5px;
+      background: rgba(59,130,246,.1); color: var(--blue);
+      text-transform: uppercase;
+    }
+
+    /* Pulse animation for near-breach rows */
+    .pulse-row { animation: rowpulse 2.8s ease-in-out infinite; }
+    @keyframes rowpulse {
+      0%,100% { box-shadow: none; }
+      50%      { box-shadow: inset 4px 0 0 var(--breach); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">LCM</div>
+      <div>
+        <div class="brand-name">LCM</div>
+        <div class="brand-sub">Life Cycle Management</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Monitoring</div>
+      <div class="nav-item active">
+        <span class="ni-icon">◈</span>
+        Barrier Monitor
+        <span class="nav-badge red">3</span>
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">📈</span>
+        Rate Dashboard
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">🔔</span>
+        Alert Manager
+        <span class="nav-badge amber">7</span>
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">⚡</span>
+        Event Stream
+      </div>
+    </div>
+
+    <div class="sidebar-hr"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Trading</div>
+      <div class="nav-item">
+        <span class="ni-icon">📋</span>
+        Position Book
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">🔁</span>
+        Murex Gateway
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">📒</span>
+        Trade Blotter
+      </div>
+    </div>
+
+    <div class="sidebar-hr"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Risk</div>
+      <div class="nav-item">
+        <span class="ni-icon">🛡</span>
+        Risk Limits
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">Δ</span>
+        Greeks Monitor
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">🗂</span>
+        Audit Trail
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">📉</span>
+        P&amp;L Analysis
+      </div>
+    </div>
+
+    <div class="sidebar-hr"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">System</div>
+      <div class="nav-item">
+        <span class="ni-icon">⚙</span>
+        Configuration
+      </div>
+      <div class="nav-item">
+        <span class="ni-icon">🔌</span>
+        Connectivity
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="user-av">JT</div>
+        <div>
+          <div class="user-name">James Tan</div>
+          <div class="user-role">FX Options Trader · SG</div>
+        </div>
+        <div class="user-more">⋯</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <div class="main">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div>
+        <div class="hdr-title">American Barrier Monitoring</div>
+        <div class="hdr-crumb">LCM › Barrier Options › American Style</div>
+      </div>
+
+      <div class="hdr-divider"></div>
+
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+
+      <div class="hdr-divider"></div>
+
+      <div class="conn-pill">
+        <div class="conn-dot"></div>
+        Backend Connected
+      </div>
+
+      <div class="hdr-divider"></div>
+
+      <div class="conn-pill">
+        <div class="conn-dot"></div>
+        Murex: ONLINE
+      </div>
+
+      <div class="hdr-divider"></div>
+
+      <div class="conn-pill">
+        <div class="conn-dot"></div>
+        LSEG DataScope
+      </div>
+
+      <div class="hdr-divider"></div>
+
+      <div class="conn-pill">
+        <div class="conn-dot"></div>
+        LSEG Refinitiv
+      </div>
+
+      <div class="hdr-right">
+        <div class="hdr-time">Last tick: <strong id="clock">09:47:32</strong> SGT</div>
+
+        <button class="theme-btn" onclick="toggleTheme()">
+          <span id="themeIcon">🌙</span>
+          <span id="themeLabel">Dark</span>
+        </button>
+
+        <div class="icon-btn" title="Notifications">
+          🔔
+          <span class="badge-dot">7</span>
+        </div>
+
+        <div class="icon-btn" title="Export Report">📥</div>
+        <div class="icon-btn" title="Settings">⚙</div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── KPI ROW ── -->
+      <div class="kpi-row">
+        <div class="kpi-card k-accent">
+          <div class="kpi-label">Active Barriers</div>
+          <div class="kpi-value text-accent">47</div>
+          <div class="kpi-sub">American style · All CCY</div>
+          <div class="kpi-tag wn">▲ +3 from yesterday</div>
+        </div>
+        <div class="kpi-card k-amber">
+          <div class="kpi-label">Near Breach <span style="opacity:.6;font-size:9px">&lt;1%</span></div>
+          <div class="kpi-value text-amber">8</div>
+          <div class="kpi-sub">Within 1% of barrier level</div>
+          <div class="kpi-tag wn">⚠ Monitoring active</div>
+        </div>
+        <div class="kpi-card k-red">
+          <div class="kpi-label">Breached Today</div>
+          <div class="kpi-value text-breach">3</div>
+          <div class="kpi-sub">Murex knock events sent</div>
+          <div class="kpi-tag dn">▼ 1 from yesterday</div>
+        </div>
+        <div class="kpi-card k-green">
+          <div class="kpi-label">Murex Events</div>
+          <div class="kpi-value text-green">12</div>
+          <div class="kpi-sub">All acknowledged · 0 queued</div>
+          <div class="kpi-tag up">✓ Avg latency 11ms</div>
+        </div>
+        <div class="kpi-card k-blue">
+          <div class="kpi-label">Total Notional</div>
+          <div class="kpi-value" style="font-size:22px;margin-top:4px">USD 2.4B</div>
+          <div class="kpi-sub">Across all active barriers</div>
+          <div class="kpi-tag up">▲ +4.2% WoW</div>
+        </div>
+      </div>
+
+      <!-- ── BODY GRID ── -->
+      <div class="body-grid">
+
+        <!-- LEFT COLUMN -->
+        <div class="col-main">
+
+          <!-- RATE FEED CARD -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">📡</span>
+              <div>
+                <div class="card-title">Live Rate Feed — Backend Service</div>
+                <div class="card-sub">LSEG DataScope · LSEG Refinitiv RTDS · Internal Composite | Ticking every 250ms</div>
+              </div>
+              <div class="card-actions">
+                <div class="conn-pill"><div class="conn-dot"></div> Stream Active</div>
+                <button class="btn">⏸ Pause</button>
+                <button class="btn">Configure</button>
+              </div>
+            </div>
+
+            <div class="rate-grid" id="rateGrid">
+
+              <div class="rate-cell" id="rc-usdsgd">
+                <div class="rc-pair">USD/SGD <span class="src-tag src-rtds">RTDS</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid text-amber" id="bid-usdsgd">1.3482</span>
+                  <span class="rc-ask">/ 1.3485</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 3.0</span>
+                  <span class="rc-chg chg-up" id="chg-usdsgd">▲ +0.0012 (+0.09%)</span>
+                </div>
+              </div>
+
+              <div class="rate-cell" id="rc-eurusd">
+                <div class="rc-pair">EUR/USD <span class="src-tag src-lseg">LSEG</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid" id="bid-eurusd">1.0843</span>
+                  <span class="rc-ask">/ 1.0846</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 3.0</span>
+                  <span class="rc-chg chg-dn" id="chg-eurusd">▼ −0.0021 (−0.19%)</span>
+                </div>
+              </div>
+
+              <div class="rate-cell" id="rc-gbpusd">
+                <div class="rc-pair">GBP/USD <span class="src-tag src-lseg">LSEG</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid" id="bid-gbpusd">1.2734</span>
+                  <span class="rc-ask">/ 1.2737</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 3.0</span>
+                  <span class="rc-chg chg-up" id="chg-gbpusd">▲ +0.0008 (+0.06%)</span>
+                </div>
+              </div>
+
+              <div class="rate-cell" id="rc-usdjpy">
+                <div class="rc-pair">USD/JPY <span class="src-tag src-rtds">RTDS</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid text-breach fw-800" id="bid-usdjpy">154.82</span>
+                  <span class="rc-ask">/ 154.86</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 4.0</span>
+                  <span class="rc-chg chg-up" id="chg-usdjpy">▲ +0.34 (+0.22%) ⚠</span>
+                </div>
+              </div>
+
+              <div class="rate-cell" id="rc-audusd">
+                <div class="rc-pair">AUD/USD <span class="src-tag src-int">INT</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid" id="bid-audusd">0.6412</span>
+                  <span class="rc-ask">/ 0.6415</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 3.0</span>
+                  <span class="rc-chg chg-dn" id="chg-audusd">▼ −0.0019 (−0.30%)</span>
+                </div>
+              </div>
+
+              <div class="rate-cell" id="rc-eursgd">
+                <div class="rc-pair">EUR/SGD <span class="src-tag src-rtds">RTDS</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid" id="bid-eursgd">1.4618</span>
+                  <span class="rc-ask">/ 1.4622</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 4.0</span>
+                  <span class="rc-chg chg-dn" id="chg-eursgd">▼ −0.0009 (−0.06%)</span>
+                </div>
+              </div>
+
+              <div class="rate-cell" id="rc-usdcnh">
+                <div class="rc-pair">USD/CNH <span class="src-tag src-lseg">LSEG</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid text-amber" id="bid-usdcnh">7.2341</span>
+                  <span class="rc-ask">/ 7.2348</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 7.0</span>
+                  <span class="rc-chg chg-up" id="chg-usdcnh">▲ +0.0042 (+0.06%) ⚠</span>
+                </div>
+              </div>
+
+              <div class="rate-cell" id="rc-usdhkd">
+                <div class="rc-pair">USD/HKD <span class="src-tag src-int">INT</span></div>
+                <div class="flex-center gap-6">
+                  <span class="rc-bid" id="bid-usdhkd">7.7821</span>
+                  <span class="rc-ask">/ 7.7824</span>
+                </div>
+                <div class="rc-meta">
+                  <span class="rc-spd">Spd: 3.0</span>
+                  <span class="rc-chg chg-up" id="chg-usdhkd">▲ +0.0003 (+0.00%)</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- BARRIER TABLE CARD -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">🛡</span>
+              <div>
+                <div class="card-title">American Barrier Positions — Live Monitor</div>
+                <div class="card-sub">Spot rate vs. barrier level · Murex knock-event trigger on breach</div>
+              </div>
+              <div class="card-actions">
+                <span class="tag-am">AMERICAN</span>
+                <button class="btn prim">+ Add Barrier</button>
+                <button class="btn">📥 Export</button>
+              </div>
+            </div>
+
+            <div class="filter-bar">
+              <input class="search-box" type="text" placeholder="🔍  Search trade ID or currency pair…" />
+              <select class="sel">
+                <option>All Currency Pairs</option>
+                <option>USD/SGD</option>
+                <option>EUR/USD</option>
+                <option>USD/JPY</option>
+                <option>AUD/USD</option>
+                <option>USD/CNH</option>
+              </select>
+              <select class="sel">
+                <option>All Barrier Types</option>
+                <option>Up-and-In</option>
+                <option>Up-and-Out</option>
+                <option>Down-and-In</option>
+                <option>Down-and-Out</option>
+              </select>
+              <select class="sel">
+                <option>All Statuses</option>
+                <option>Active</option>
+                <option>Near Breach</option>
+                <option>Breached</option>
+                <option>Triggered</option>
+              </select>
+              <div class="chip on">All (47)</div>
+              <div class="chip">Near Breach (8)</div>
+              <div class="chip">Breached (3)</div>
+              <div class="chip">Triggered (3)</div>
+            </div>
+
+            <div class="tbl-wrap scroll-area">
+              <table class="btable">
+                <thead>
+                  <tr>
+                    <th>Trade ID ↕</th>
+                    <th>Pair ↕</th>
+                    <th>Type</th>
+                    <th>Barrier Level ↕</th>
+                    <th>Spot Rate ↕</th>
+                    <th>Dist (pips) ↕</th>
+                    <th>% Dist</th>
+                    <th>Direction</th>
+                    <th>Notional</th>
+                    <th>Maturity ↕</th>
+                    <th>Status</th>
+                    <th>Murex Event</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  <tr class="row-breach pulse-row">
+                    <td class="mono text-breach fw-800">TRD-19847</td>
+                    <td><strong>USD/SGD</strong></td>
+                    <td><span class="bt-chip bt-uio">Up-Out</span></td>
+                    <td class="mono">1.3500</td>
+                    <td class="mono text-breach fw-800">1.3502 🔴</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-breach" style="width:100%"></div></div>
+                      </div>
+                    </td>
+                    <td class="fw-800 text-breach">BREACH</td>
+                    <td class="text-sec fs-10">Spot &gt; Barrier</td>
+                    <td class="mono">USD 75M</td>
+                    <td class="fs-10">30 May 2026</td>
+                    <td><span class="spill sp-breach">🔴 BREACHED</span></td>
+                    <td><button class="mx-btn mx-trig">✓ Sent · MX-09847</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr class="row-breach">
+                    <td class="mono text-breach fw-800">TRD-20003</td>
+                    <td><strong>USD/SGD</strong></td>
+                    <td><span class="bt-chip bt-dio">Dn-Out</span></td>
+                    <td class="mono">1.3400</td>
+                    <td class="mono text-breach fw-800">1.3398 🔴</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-breach" style="width:100%"></div></div>
+                      </div>
+                    </td>
+                    <td class="fw-800 text-breach">BREACH</td>
+                    <td class="text-sec fs-10">Spot &lt; Barrier</td>
+                    <td class="mono">USD 60M</td>
+                    <td class="fs-10">22 May 2026</td>
+                    <td><span class="spill sp-breach">🔴 BREACHED</span></td>
+                    <td><button class="mx-btn mx-trig">✓ Sent · MX-09801</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr class="row-warn">
+                    <td class="mono fw-800 text-amber">TRD-20847</td>
+                    <td><strong>USD/JPY</strong></td>
+                    <td><span class="bt-chip bt-uio">Up-Out</span></td>
+                    <td class="mono">155.00</td>
+                    <td class="mono text-amber fw-800">154.82</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-breach" style="width:88%"></div></div>
+                        <span class="fs-10 fw-800 text-breach">18</span>
+                      </div>
+                    </td>
+                    <td class="fw-800 text-breach">0.12%</td>
+                    <td class="text-sec fs-10">Spot &lt; Barrier</td>
+                    <td class="mono">USD 50M</td>
+                    <td class="fs-10">30 Jun 2026</td>
+                    <td><span class="spill sp-red">⚠ Near Breach</span></td>
+                    <td><button class="mx-btn mx-pend">⏳ Staged</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr class="row-warn">
+                    <td class="mono fw-800 text-amber">TRD-20391</td>
+                    <td><strong>EUR/USD</strong></td>
+                    <td><span class="bt-chip bt-dio">Dn-Out</span></td>
+                    <td class="mono">1.0800</td>
+                    <td class="mono text-amber fw-800">1.0843</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-dang" style="width:76%"></div></div>
+                        <span class="fs-10 fw-800 text-amber">43</span>
+                      </div>
+                    </td>
+                    <td class="fw-800 text-amber">0.40%</td>
+                    <td class="text-sec fs-10">Spot &gt; Barrier</td>
+                    <td class="mono">EUR 30M</td>
+                    <td class="fs-10">15 Jul 2026</td>
+                    <td><span class="spill sp-amber">⚡ Watch</span></td>
+                    <td><button class="mx-btn mx-pend">⏳ Staged</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr class="row-warn">
+                    <td class="mono fw-800 text-amber">TRD-20641</td>
+                    <td><strong>USD/CNH</strong></td>
+                    <td><span class="bt-chip bt-uio">Up-Out</span></td>
+                    <td class="mono">7.2500</td>
+                    <td class="mono text-amber fw-800">7.2341</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-warn" style="width:62%"></div></div>
+                        <span class="fs-10 fw-800 text-amber">159</span>
+                      </div>
+                    </td>
+                    <td class="fw-800 text-amber">0.72%</td>
+                    <td class="text-sec fs-10">Spot &lt; Barrier</td>
+                    <td class="mono">USD 25M</td>
+                    <td class="fs-10">05 Jun 2026</td>
+                    <td><span class="spill sp-amber">⚠ Near</span></td>
+                    <td><button class="mx-btn mx-none">— None</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr>
+                    <td class="mono">TRD-20012</td>
+                    <td><strong>GBP/USD</strong></td>
+                    <td><span class="bt-chip bt-dii">Dn-In</span></td>
+                    <td class="mono">1.2600</td>
+                    <td class="mono">1.2734</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-safe" style="width:28%"></div></div>
+                        <span class="fs-10 text-sec">134</span>
+                      </div>
+                    </td>
+                    <td class="text-green fw-800">1.06%</td>
+                    <td class="text-sec fs-10">Spot &gt; Barrier</td>
+                    <td class="mono">GBP 20M</td>
+                    <td class="fs-10">20 Aug 2026</td>
+                    <td><span class="spill sp-green">● Active</span></td>
+                    <td><button class="mx-btn mx-none">— None</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr>
+                    <td class="mono">TRD-20156</td>
+                    <td><strong>AUD/USD</strong></td>
+                    <td><span class="bt-chip bt-uii">Up-In</span></td>
+                    <td class="mono">0.6600</td>
+                    <td class="mono">0.6412</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-safe" style="width:22%"></div></div>
+                        <span class="fs-10 text-sec">188</span>
+                      </div>
+                    </td>
+                    <td class="text-green fw-800">2.93%</td>
+                    <td class="text-sec fs-10">Spot &lt; Barrier</td>
+                    <td class="mono">AUD 40M</td>
+                    <td class="fs-10">12 Sep 2026</td>
+                    <td><span class="spill sp-green">● Active</span></td>
+                    <td><button class="mx-btn mx-none">— None</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr class="row-breach">
+                    <td class="mono text-purple fw-800">TRD-19541</td>
+                    <td><strong>AUD/USD</strong></td>
+                    <td><span class="bt-chip bt-dii">Dn-In</span></td>
+                    <td class="mono">0.6390</td>
+                    <td class="mono text-purple fw-800">0.6388 ✓</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-breach" style="width:100%"></div></div>
+                      </div>
+                    </td>
+                    <td class="fw-800 text-purple">KI TRIG</td>
+                    <td class="text-sec fs-10">Spot &lt; Barrier</td>
+                    <td class="mono">AUD 35M</td>
+                    <td class="fs-10">08 Aug 2026</td>
+                    <td><span class="spill sp-purple">✓ Knock-In</span></td>
+                    <td><button class="mx-btn mx-trig">✓ Sent · MX-09734</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                  <tr>
+                    <td class="mono">TRD-20788</td>
+                    <td><strong>EUR/SGD</strong></td>
+                    <td><span class="bt-chip bt-dii">Dn-In</span></td>
+                    <td class="mono">1.4400</td>
+                    <td class="mono">1.4618</td>
+                    <td>
+                      <div class="dist-wrap">
+                        <div class="dist-bar"><div class="dist-fill df-safe" style="width:32%"></div></div>
+                        <span class="fs-10 text-sec">218</span>
+                      </div>
+                    </td>
+                    <td class="text-green fw-800">1.51%</td>
+                    <td class="text-sec fs-10">Spot &gt; Barrier</td>
+                    <td class="mono">EUR 15M</td>
+                    <td class="fs-10">01 Oct 2026</td>
+                    <td><span class="spill sp-green">● Active</span></td>
+                    <td><button class="mx-btn mx-none">— None</button></td>
+                    <td><button class="btn">Detail</button></td>
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <button class="pg-btn on">1</button>
+              <button class="pg-btn">2</button>
+              <button class="pg-btn">3</button>
+              <button class="pg-btn">4</button>
+              <button class="pg-btn">5</button>
+              <span style="color:var(--text-muted);font-size:12px">…</span>
+              <button class="pg-btn">10</button>
+              <div class="pg-info">Showing 1–9 of 47 barriers</div>
+            </div>
+
+            <div class="mx-strip">
+              <div class="mx-dot"></div>
+              <span class="mx-txt">
+                Murex Gateway: <strong>ONLINE</strong> &nbsp;·&nbsp;
+                Last event: <strong>TRD-19847 USD/SGD Up-Out → Knock-Out processed @ 09:31:04</strong> &nbsp;·&nbsp;
+                Queue: <strong>0 pending</strong> &nbsp;·&nbsp;
+                Round-trip latency: <strong>11ms</strong>
+              </span>
+            </div>
+          </div>
+
+        </div><!-- /col-main -->
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-side">
+
+          <!-- ALERTS CARD -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">🔔</span>
+              <div>
+                <div class="card-title">Active Alerts</div>
+                <div class="card-sub">7 unacknowledged</div>
+              </div>
+              <div class="card-actions">
+                <button class="btn">Ack All</button>
+              </div>
+            </div>
+            <div>
+              <div class="alert-item">
+                <div class="al-dot al-crit"></div>
+                <div>
+                  <div class="al-title">TRD-19847 USD/SGD Up-Out — BREACHED</div>
+                  <div class="al-sub">Spot 1.3502 &gt; Barrier 1.3500 · Knock-Out triggered</div>
+                  <div class="al-time">🕐 09:31:04 SGT · Murex ACK in 1ms</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="al-dot al-crit"></div>
+                <div>
+                  <div class="al-title">TRD-20003 USD/SGD Dn-Out — BREACHED</div>
+                  <div class="al-sub">Spot 1.3398 &lt; Barrier 1.3400 · Knock-Out triggered</div>
+                  <div class="al-time">🕐 08:14:22 SGT · Murex ACK in 1ms</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="al-dot al-crit"></div>
+                <div>
+                  <div class="al-title">TRD-20847 USD/JPY Up-Out — NEAR BREACH</div>
+                  <div class="al-sub">Spot 154.82 · Barrier 155.00 · Dist: 18 pips (0.12%)</div>
+                  <div class="al-time">🕐 09:42:17 SGT · Trader notified · Pre-event staged</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="al-dot al-warn"></div>
+                <div>
+                  <div class="al-title">TRD-20391 EUR/USD Dn-Out — WATCH</div>
+                  <div class="al-sub">Spot 1.0843 · Barrier 1.0800 · Dist: 43 pips (0.40%)</div>
+                  <div class="al-time">🕐 09:38:55 SGT</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="al-dot al-warn"></div>
+                <div>
+                  <div class="al-title">TRD-20641 USD/CNH Up-Out — NEAR</div>
+                  <div class="al-sub">Spot 7.2341 · Barrier 7.2500 · Dist: 159 pips (0.72%)</div>
+                  <div class="al-time">🕐 09:29:03 SGT</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="al-dot al-info"></div>
+                <div>
+                  <div class="al-title">LSEG RTDS stream restored</div>
+                  <div class="al-sub">Feed reconnected after 4s interruption</div>
+                  <div class="al-time">🕐 09:44:12 SGT · Auto-recovered</div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="al-dot al-info"></div>
+                <div>
+                  <div class="al-title">EUR/USD tick spike filtered</div>
+                  <div class="al-sub">+0.0085 (0.78%) spike rejected · Stale tick discarded</div>
+                  <div class="al-time">🕐 09:28:11 SGT · Auto-filter applied</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MUREX EVENT LOG -->
+          <div class="card" style="flex:1">
+            <div class="card-header">
+              <span class="card-icon">🔁</span>
+              <div>
+                <div class="card-title">Murex Event Log</div>
+                <div class="card-sub">All knock-events sent today</div>
+              </div>
+              <div class="card-actions">
+                <button class="btn">Full Audit</button>
+              </div>
+            </div>
+            <div class="scroll-area">
+
+              <div class="log-item">
+                <div class="log-icon li-breach">🔴</div>
+                <div>
+                  <div class="log-title text-breach">KNOCK-OUT — USD/SGD Up-Out Breached</div>
+                  <div class="log-desc">TRD-19847 · Spot crossed 1.3500 · Knock-Out event dispatched · Delta unwind triggered · Ref: MX-2026-09847</div>
+                  <div class="log-meta">09:31:04 SGT · ACK 09:31:05 (1ms) · System · ✓ Confirmed</div>
+                </div>
+              </div>
+
+              <div class="log-item">
+                <div class="log-icon li-murex">🔁</div>
+                <div>
+                  <div class="log-title text-purple">MUREX — Position Update Booked</div>
+                  <div class="log-desc">TRD-19847 knocked-out · Delta hedges unwound · P&amp;L realized · Book: FX-OPT-SGD</div>
+                  <div class="log-meta">09:31:06 SGT · Auto-processed · Ref: MX-2026-09847</div>
+                </div>
+              </div>
+
+              <div class="log-item">
+                <div class="log-icon li-breach">🔴</div>
+                <div>
+                  <div class="log-title text-breach">KNOCK-OUT — USD/SGD Dn-Out Breached</div>
+                  <div class="log-desc">TRD-20003 · Spot crossed 1.3400 downward · Knock-Out dispatched · Ref: MX-2026-09801</div>
+                  <div class="log-meta">08:14:22 SGT · ACK 08:14:23 (1ms) · System · ✓ Confirmed</div>
+                </div>
+              </div>
+
+              <div class="log-item">
+                <div class="log-icon li-breach">🟣</div>
+                <div>
+                  <div class="log-title text-purple">KNOCK-IN — AUD/USD Dn-In Activated</div>
+                  <div class="log-desc">TRD-19541 · Spot crossed 0.6390 · Option activated · Vanilla call now live · Ref: MX-2026-09734</div>
+                  <div class="log-meta">07:52:39 SGT · ACK 07:52:40 (1ms) · System · ✓ Confirmed</div>
+                </div>
+              </div>
+
+              <div class="log-item">
+                <div class="log-icon li-warn">⚠</div>
+                <div>
+                  <div class="log-title text-amber">NEAR-BREACH — USD/JPY Pre-Event Staged</div>
+                  <div class="log-desc">TRD-20847 · Dist 18 pips · Murex pre-event cached · Trader alerted via FXConnect &amp; Email</div>
+                  <div class="log-meta">09:42:17 SGT · Pre-staged for instant dispatch</div>
+                </div>
+              </div>
+
+              <div class="log-item">
+                <div class="log-icon li-murex">🔁</div>
+                <div>
+                  <div class="log-title text-purple">MUREX — Greeks Batch Recalculation</div>
+                  <div class="log-desc">Batch recalc for 8 near-breach positions sent · Delta/Gamma refreshed · Ref: MX-2026-BATCH-047</div>
+                  <div class="log-meta">09:35:00 SGT · Scheduled trigger · Completed in 284ms</div>
+                </div>
+              </div>
+
+              <div class="log-item">
+                <div class="log-icon li-rate">📡</div>
+                <div>
+                  <div class="log-title">FEED — EUR/USD Tick Spike Rejected</div>
+                  <div class="log-desc">+0.0085 spike filtered by anomaly detector · Barrier checks paused 300ms · Source: LSEG DataScope</div>
+                  <div class="log-meta">09:28:11 SGT · Auto-filter · No Murex action taken</div>
+                </div>
+              </div>
+
+              <div class="log-item">
+                <div class="log-icon li-ok">✓</div>
+                <div>
+                  <div class="log-title text-green">SYSTEM — Daily Barrier Load Complete</div>
+                  <div class="log-desc">47 barriers loaded from Murex · Rate subscriptions via LSEG established · All feeds healthy</div>
+                  <div class="log-meta">07:00:02 SGT · System startup · Ops Team</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div><!-- /col-side -->
+      </div><!-- /body-grid -->
+    </div><!-- /content -->
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <div class="sb-item"><div class="sb-dot ok"></div><span style="color:var(--green)">Backend API: Online</span></div>
+      <div class="sb-item"><div class="sb-dot ok"></div><span style="color:var(--green)">Murex Gateway: Online</span></div>
+      <div class="sb-item"><div class="sb-dot ok"></div><span style="color:var(--green)">LSEG Refinitiv RTDS: Active</span></div>
+      <div class="sb-item"><div class="sb-dot ok"></div><span style="color:var(--green)">LSEG DataScope: Active</span></div>
+      <div class="sb-item"><div class="sb-dot ok"></div><span style="color:var(--green)">Rate Engine: 250ms tick</span></div>
+      <div class="sb-item"><div class="sb-dot rd"></div><span style="color:var(--breach)">3 Barriers Breached</span></div>
+      <div class="sb-item"><div class="sb-dot wn"></div><span style="color:var(--amber)">8 Near-Breach (warn)</span></div>
+      <span style="margin-left:auto">LCM — Life Cycle Management v4.1.2 | Env: PROD | Region: SGP</span>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+  /* ── Theme toggle ── */
+  let dark = false;
+  function toggleTheme() {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('themeIcon').textContent  = dark ? '☀️' : '🌙';
+    document.getElementById('themeLabel').textContent = dark ? 'Light' : 'Dark';
+  }
+
+  /* ── Live clock ── */
+  function updateClock() {
+    const now = new Date();
+    const sgt = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Singapore' }));
+    const pad = n => String(n).padStart(2, '0');
+    document.getElementById('clock').textContent =
+      pad(sgt.getHours()) + ':' + pad(sgt.getMinutes()) + ':' + pad(sgt.getSeconds());
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  /* ── Simulated rate ticking ── */
+  const feeds = {
+    'usdsgd': { el: 'rc-usdsgd', bid: 1.3482, dp: 4, bid_el: 'bid-usdsgd' },
+    'eurusd':  { el: 'rc-eurusd',  bid: 1.0843, dp: 4, bid_el: 'bid-eurusd'  },
+    'gbpusd':  { el: 'rc-gbpusd',  bid: 1.2734, dp: 4, bid_el: 'bid-gbpusd'  },
+    'usdjpy':  { el: 'rc-usdjpy',  bid: 154.82, dp: 2, bid_el: 'bid-usdjpy'  },
+    'audusd':  { el: 'rc-audusd',  bid: 0.6412, dp: 4, bid_el: 'bid-audusd'  },
+    'eursgd':  { el: 'rc-eursgd',  bid: 1.4618, dp: 4, bid_el: 'bid-eursgd'  },
+    'usdcnh':  { el: 'rc-usdcnh',  bid: 7.2341, dp: 4, bid_el: 'bid-usdcnh'  },
+    'usdhkd':  { el: 'rc-usdhkd',  bid: 7.7821, dp: 4, bid_el: 'bid-usdhkd'  },
+  };
+
+  function tickRates() {
+    const keys = Object.keys(feeds);
+    const count = Math.floor(Math.random() * 2) + 1;
+    const picks = keys.sort(() => Math.random() - 0.5).slice(0, count);
+
+    picks.forEach(k => {
+      const f = feeds[k];
+      const noise = (Math.random() - 0.48) * Math.pow(10, -(f.dp - 1));
+      f.bid = Math.max(f.bid + noise, 0.01);
+
+      const bidEl  = document.getElementById(f.bid_el);
+      const cellEl = document.getElementById(f.el);
+      if (!bidEl || !cellEl) return;
+
+      const up = noise >= 0;
+      bidEl.textContent = f.bid.toFixed(f.dp);
+
+      cellEl.classList.remove('rate-flash', 'rate-flash-dn');
+      void cellEl.offsetWidth;
+      cellEl.classList.add(up ? 'rate-flash' : 'rate-flash-dn');
+    });
+  }
+
+  setInterval(tickRates, 800);
+</script>
+</body>
+</html>
