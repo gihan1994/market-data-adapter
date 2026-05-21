@@ -1,0 +1,1167 @@
+<mxfile host="app.diagrams.net" pages="7">
+  <diagram name="1. System Architecture" id="FJ4nluEhVMC3OyeE7D2l">
+    <mxGraphModel dx="3089" dy="1782" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bg_lseg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;verticalAlign=top;opacity=60;" value="&lt;b&gt;☁️  LSEG Real-Time Platform&lt;/b&gt;" vertex="1">
+          <mxGeometry height="130" width="720" x="400" y="-91" as="geometry" />
+        </mxCell>
+        <mxCell id="lseg_auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;OAuth2 Token Endpoint&lt;/b&gt;" vertex="1">
+          <mxGeometry height="65" width="220" x="440" y="-51" as="geometry" />
+        </mxCell>
+        <mxCell id="lseg_stream" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;ERT / RTO Streaming&lt;/b&gt;&#xa;EMA / OMM Protocol" vertex="1">
+          <mxGeometry height="65" width="240" x="860" y="-51" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_openshift" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;verticalAlign=top;opacity=40;" value="&lt;b&gt;🔴  OpenShift Cluster — market-data-service&lt;/b&gt;" vertex="1">
+          <mxGeometry height="470" width="1180" x="10" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_pod1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 1 — 🟢 ACTIVE LEADER&lt;/b&gt;" vertex="1">
+          <mxGeometry height="420" width="270" x="25" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_omm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="OmmConsumer&#xa;&lt;b&gt;SUBSCRIBED to all RICs&lt;/b&gt;" vertex="1">
+          <mxGeometry height="42" width="240" x="40" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Leader Election Service" vertex="1">
+          <mxGeometry height="38" width="240" x="40" y="562" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_sm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Subscription Manager" vertex="1">
+          <mxGeometry height="38" width="240" x="40" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_srl" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Subscription Request Listener" vertex="1">
+          <mxGeometry height="38" width="240" x="40" y="473" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_kp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Kafka Producer Service" vertex="1">
+          <mxGeometry height="38" width="240" x="40" y="431" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_rec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Recovery Service" vertex="1">
+          <mxGeometry height="38" width="240" x="40" y="387" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="LSEG Auth Service (OAuth2)" vertex="1">
+          <mxGeometry height="38" width="240" x="40" y="517" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_pod2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 2 — 🟡 WARM STANDBY&lt;/b&gt;" vertex="1">
+          <mxGeometry height="420" width="270" x="310" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_omm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="OmmConsumer&#xa;&lt;b&gt;LOGGED-IN, NO SUBSCRIPTIONS&lt;/b&gt;" vertex="1">
+          <mxGeometry height="42" width="240" x="325" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Leader Election Service" vertex="1">
+          <mxGeometry height="38" width="240" x="325" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_sm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Subscription Manager&#xa;(preloaded list, idle)" vertex="1">
+          <mxGeometry height="38" width="240" x="325" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_srl" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Subscription Request Listener (idle)" vertex="1">
+          <mxGeometry height="38" width="240" x="325" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_kp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Kafka Producer Service (idle)" vertex="1">
+          <mxGeometry height="38" width="240" x="325" y="431" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_rec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Recovery Service (ready)" vertex="1">
+          <mxGeometry height="38" width="240" x="325" y="389" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="LSEG Auth Service (token watcher)" vertex="1">
+          <mxGeometry height="38" width="240" x="325" y="517" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_pod3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 3 — ⚪ COLD STANDBY&lt;/b&gt;" vertex="1">
+          <mxGeometry height="180" width="270" x="595" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Leader Election Service" vertex="1">
+          <mxGeometry height="38" width="240" x="610" y="341" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_hc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;" value="Health Check (no LSEG conn)" vertex="1">
+          <mxGeometry height="38" width="240" x="610" y="257" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_pod4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 4 — ⚪ COLD STANDBY&lt;/b&gt;" vertex="1">
+          <mxGeometry height="180" width="270" x="880" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Leader Election Service" vertex="1">
+          <mxGeometry height="38" width="240" x="895" y="343" as="geometry" />
+        </mxCell>
+        <mxCell id="p4_hc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;" value="Health Check (no LSEG conn)" vertex="1">
+          <mxGeometry height="38" width="240" x="895" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;fontSize=10;align=left;spacingLeft=8;verticalAlign=middle;" value="&lt;b&gt;Legend&lt;/b&gt;&#xa;━━  Live data flow&#xa;┄┄  Control / recovery flow&#xa;🟢  Active leader — subscribed&#xa;🟡  Warm standby — logged-in (2nd login)&#xa;⚪  Cold standby — no LSEG session" vertex="1">
+          <mxGeometry height="120" width="280" x="1200" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="billing_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=8;verticalAlign=middle;" value="&lt;b&gt;💰 Billing Model&lt;/b&gt;&#xa;2 EMA logins = 2 charges&#xa;(active + warm)&#xa;Pod 3, 4 = no LSEG session = no charge" vertex="1">
+          <mxGeometry height="80" width="280" x="1200" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="failover_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=8;verticalAlign=middle;" value="&lt;b&gt;⚡ Failover (Warm Standby)&lt;/b&gt;&#xa;t = 0s    Pod 1 crashes&#xa;t = 5s    Redis lock TTL expires&#xa;t = 5s    Pod 2 wins election&#xa;t = 5s    Pod 2 already has EMA session&#xa;t = 6s    Pod 2 sends ReqMsg for all RICs&#xa;t = 7s    LSEG sends snapshots&#xa;t = 7s    Pod 2 publishes to Kafka&#xa;&#xa;&lt;b&gt;Downtime: ~5-7 seconds&lt;/b&gt;" vertex="1">
+          <mxGeometry height="190" width="280" x="1200" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;verticalAlign=top;opacity=70;" value="&lt;b&gt;🔴  Redis Cluster&lt;/b&gt;" vertex="1">
+          <mxGeometry height="350" width="420" x="517" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="r_lock" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="🔒  &lt;b&gt;leader:lock&lt;/b&gt;  —  Redisson lock, TTL 5s, hb 2s" vertex="1">
+          <mxGeometry height="38" width="395" x="529" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="r_rics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="📋  &lt;b&gt;ric:active&lt;/b&gt;  —  Sorted Set of subscribed RICs" vertex="1">
+          <mxGeometry height="38" width="395" x="529" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="r_price" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="💹  &lt;b&gt;ric:price:{sym}&lt;/b&gt;  —  Latest tick cache" vertex="1">
+          <mxGeometry height="38" width="395" x="529" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="r_token" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="🔑  &lt;b&gt;lseg:auth:token&lt;/b&gt;  —  shared by Pod 1 + Pod 2" vertex="1">
+          <mxGeometry height="38" width="395" x="529" y="855" as="geometry" />
+        </mxCell>
+        <mxCell id="r_gap" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="⏱  &lt;b&gt;ric:last-published:{sym}&lt;/b&gt;  —  Gap timestamp" vertex="1">
+          <mxGeometry height="38" width="395" x="529" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="r_refcount" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="🔢  &lt;b&gt;subscription:refcount:{ric}&lt;/b&gt;  —  Active subscribers" vertex="1">
+          <mxGeometry height="38" width="395" x="529" y="945" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_pg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;verticalAlign=top;opacity=70;" value="&lt;b&gt;🐘  PostgreSQL&lt;/b&gt;" vertex="1">
+          <mxGeometry height="350" width="290" x="-482" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_ric" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;ric_registry&lt;/b&gt;" vertex="1">
+          <mxGeometry height="38" width="265" x="-469" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_reqs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;subscription_requests&lt;/b&gt;&#xa;(business_ms, ric, requested_at)" vertex="1">
+          <mxGeometry height="42" width="265" x="-469" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_gaps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;market_data_gaps&lt;/b&gt;" vertex="1">
+          <mxGeometry height="38" width="265" x="-469" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_audit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;subscription_audit&lt;/b&gt;" vertex="1">
+          <mxGeometry height="38" width="265" x="-469" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_kafka" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13;verticalAlign=top;opacity=70;" value="&lt;b&gt;⚡  Apache Kafka&lt;/b&gt;" vertex="1">
+          <mxGeometry height="350" width="400" x="436" y="1100" as="geometry" />
+        </mxCell>
+        <mxCell id="k_reqs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" value="&lt;b&gt;market-data-requests&lt;/b&gt;&#xa;business MS → adapter (subscribe / unsubscribe)" vertex="1">
+          <mxGeometry height="55" width="375" x="449" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="k_updates" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" value="&lt;b&gt;market-data-updates&lt;/b&gt;&#xa;adapter → business MS (live ticks)" vertex="1">
+          <mxGeometry height="55" width="375" x="449" y="1205" as="geometry" />
+        </mxCell>
+        <mxCell id="k_control" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" value="&lt;b&gt;market-data-control&lt;/b&gt;&#xa;adapter → business MS (gap events)" vertex="1">
+          <mxGeometry height="55" width="375" x="449" y="1270" as="geometry" />
+        </mxCell>
+        <mxCell id="bg_consumers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;verticalAlign=top;opacity=70;" value="&lt;b&gt;📡  Business Microservices&lt;/b&gt;&#xa;(subscribe + consume)" vertex="1">
+          <mxGeometry height="350" width="268" x="1206" y="665" as="geometry" />
+        </mxCell>
+        <mxCell id="c_trading" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;LCM MS&lt;/b&gt;" vertex="1">
+          <mxGeometry height="55" width="215" x="1220" y="779" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lseg_p1" edge="1" parent="1" source="lseg_stream" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=1;endFill=1;strokeColor=#82b366;strokeWidth=3;fontSize=10;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" target="p1_omm" value="&lt;b&gt;EMA Login #1&lt;/b&gt;&#xa;subscribed">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="92" />
+              <mxPoint x="160" y="92" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_lseg_p2" edge="1" parent="1" source="lseg_stream" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=1;endFill=1;strokeColor=#d6b656;strokeWidth=3;fontSize=10;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" target="p2_omm" value="&lt;b&gt;EMA Login #2&lt;/b&gt;&#xa;logged-in, no sub">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_auth_token" edge="1" parent="1" source="lseg_auth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;strokeColor=#6c8ebf;fontStyle=2;fontSize=9;exitX=0;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r_token" value="stores token">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-100" y="-18" />
+              <mxPoint x="-100" y="874" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_p1le_lock" edge="1" parent="1" source="p1_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#82b366;strokeWidth=2;fontSize=9;fontStyle=1;exitX=0.5;exitY=1;entryX=0.1;entryY=0;" target="r_lock" value="acquire + hb 2s">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_p2le_lock" edge="1" parent="1" source="p2_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#d6b656;dashed=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.3;entryY=0;" target="r_lock" value="watch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="445" y="644" />
+              <mxPoint x="648" y="644" />
+            </Array>
+          </mxGeometry>
+          <Array as="points">
+            <mxPoint x="445" y="660" />
+            <mxPoint x="140" y="660" />
+          </Array>
+        </mxCell>
+        <mxCell id="e_p3le_lock" edge="1" parent="1" source="p3_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#666666;dashed=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="r_lock" value="watch">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="730" y="670" />
+            <mxPoint x="240" y="670" />
+          </Array>
+        </mxCell>
+        <mxCell id="e_p4le_lock" edge="1" parent="1" source="p4_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#666666;dashed=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.8;entryY=0;" target="r_lock" value="watch">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="1015" y="680" />
+            <mxPoint x="340" y="680" />
+          </Array>
+        </mxCell>
+        <mxCell id="e_sm_pgric" edge="1" parent="1" source="p1_sm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6c8ebf;fontSize=9;exitX=0;exitY=0.5;entryX=1;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="pg_ric" value="persist RIC">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-167" y="364" />
+              <mxPoint x="-167" y="284" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_sm_rrics" edge="1" parent="1" source="p1_sm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d6b656;fontSize=9;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="r_rics" value="register">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="303" y="364" />
+              <mxPoint x="303" y="784" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_kreqs_srl" edge="1" parent="1" source="k_reqs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d79b00;strokeWidth=2;fontStyle=1;fontSize=9;exitX=0;exitY=0.3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="p1_srl" value="consume sub request">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-13" y="1156" />
+              <mxPoint x="-13" y="492" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_kp_kupd" edge="1" parent="1" source="p1_kp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d79b00;strokeWidth=2;fontStyle=1;fontSize=9;exitX=0;exitY=0.5;entryX=0;entryY=0.3;exitDx=0;exitDy=0;" target="k_updates" value="publish tick">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-39" y="450" />
+              <mxPoint x="-39" y="1222" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_rec_kctrl" edge="1" parent="1" source="p1_rec" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d79b00;dashed=1;fontSize=9;exitX=0;exitY=0.5;entryX=0;entryY=0.3;exitDx=0;exitDy=0;" target="k_control" value="gap event">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="40" y="402" />
+              <mxPoint x="-69" y="402" />
+              <mxPoint x="-69" y="1286" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_trading_kreqs" edge="1" parent="1" source="c_trading" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673a6;strokeWidth=2;fontSize=9;exitX=0.5;exitY=0;entryX=1;entryY=0.3;exitDx=0;exitDy=0;" target="k_reqs" value="subscribe / unsub">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_kupd_trading" edge="1" parent="1" source="k_updates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673a6;strokeWidth=2;fontSize=9;exitX=1;exitY=0.4;entryX=0;entryY=0.5;" target="c_trading" value="ticks">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1152" y="1227" />
+              <mxPoint x="1152" y="807" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_kctrl_trading" edge="1" parent="1" source="k_control" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673a6;dashed=1;exitX=1;exitY=0.3;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="c_trading" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="2. Sequence — Subscribe Flow" id="FsQrfGiynay6-snc1ozv">
+    <mxGraphModel dx="1144" dy="691" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title2" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" value="&lt;b&gt;Sequence — Business MS Subscribes to a RIC&lt;/b&gt;&#xa;Triggered by a SUBSCRIBE request published to &lt;i&gt;market-data-requests&lt;/i&gt; topic" vertex="1">
+          <mxGeometry height="50" width="1600" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p_trading" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;LCM MS&lt;/b&gt;&lt;br&gt;(business)" vertex="1">
+          <mxGeometry height="50" width="150" x="50" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_kreq" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-requests" vertex="1">
+          <mxGeometry height="50" width="150" x="280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_adapter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;Pod 1 Adapter&lt;/b&gt;&#xa;(LEADER)" vertex="1">
+          <mxGeometry height="50" width="150" x="510" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_pg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;PostgreSQL&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="740" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;Redis&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="970" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_lseg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;LSEG EMA&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="1200" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_kupd" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-updates" vertex="1">
+          <mxGeometry height="50" width="150" x="1430" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_trading" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#9673a6;">
+          <mxGeometry as="geometry">
+            <mxPoint x="125" y="135" as="sourcePoint" />
+            <mxPoint x="125" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_kreq" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;">
+          <mxGeometry as="geometry">
+            <mxPoint x="355" y="135" as="sourcePoint" />
+            <mxPoint x="355" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_adapter" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;strokeWidth=2;">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="135" as="sourcePoint" />
+            <mxPoint x="585" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_pg" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="815" y="135" as="sourcePoint" />
+            <mxPoint x="815" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_redis" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1045" y="135" as="sourcePoint" />
+            <mxPoint x="1045" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_lseg" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1275" y="135" as="sourcePoint" />
+            <mxPoint x="1275" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_kupd" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1505" y="135" as="sourcePoint" />
+            <mxPoint x="1505" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#9673a6;strokeWidth=2;" value="&lt;b&gt;1.&lt;/b&gt; publish { ric: &quot;EUR=&quot;, action: SUBSCRIBE, requester: &quot;lcm-ms&quot; }">
+          <mxGeometry as="geometry">
+            <mxPoint x="125" y="170" as="sourcePoint" />
+            <mxPoint x="355" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" value="&lt;b&gt;2.&lt;/b&gt; consume subscribe request (Kafka consumer)">
+          <mxGeometry as="geometry">
+            <mxPoint x="355" y="220" as="sourcePoint" />
+            <mxPoint x="585" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;3.&lt;/b&gt; SELECT current refcount for RIC &quot;EUR=&quot;">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="270" as="sourcePoint" />
+            <mxPoint x="815" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#6c8ebf;" value="&lt;b&gt;4.&lt;/b&gt; refcount = 0  (RIC is new)">
+          <mxGeometry as="geometry">
+            <mxPoint x="815" y="305" as="sourcePoint" />
+            <mxPoint x="585" y="305" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt_box" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;" value="&lt;b&gt;alt&lt;/b&gt;  [refcount == 0 → new RIC, must subscribe to LSEG]" vertex="1">
+          <mxGeometry height="350" width="900" x="574" y="338" as="geometry" />
+        </mxCell>
+        <mxCell id="m5" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;5.&lt;/b&gt; INSERT subscription_requests (trading-ms, EUR=)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="380" as="sourcePoint" />
+            <mxPoint x="815" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;6.&lt;/b&gt; INSERT ric_registry (EUR=)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="420" as="sourcePoint" />
+            <mxPoint x="815" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;7.&lt;/b&gt; SADD ric:active &quot;EUR=&quot;  &amp;  INCR subscription:refcount:EUR= → 1">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="465" as="sourcePoint" />
+            <mxPoint x="1045" y="465" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;" value="&lt;b&gt;8.&lt;/b&gt; ReqMsg.serviceName(...).name(&quot;EUR=&quot;) — EMA subscribe">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="510" as="sourcePoint" />
+            <mxPoint x="1275" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" value="&lt;b&gt;9.&lt;/b&gt; RefreshMsg (snapshot: bid=1.0852, ask=1.0853, ts)">
+          <mxGeometry as="geometry">
+            <mxPoint x="1275" y="550" as="sourcePoint" />
+            <mxPoint x="585" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m10" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;10.&lt;/b&gt; HSET ric:price:EUR= bid 1.0852 ask 1.0853">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="595" as="sourcePoint" />
+            <mxPoint x="1045" y="595" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m11" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" value="&lt;b&gt;11.&lt;/b&gt; publish snapshot tick to market-data-updates (key=EUR=)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="640" as="sourcePoint" />
+            <mxPoint x="1505" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt_else" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;" value="&lt;b&gt;alt&lt;/b&gt;  [refcount &gt; 0 → already subscribed, just increment]" vertex="1">
+          <mxGeometry height="120" width="900" x="540" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="m12" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;12.&lt;/b&gt; INSERT subscription_requests   &amp;   INCR refcount">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="740" as="sourcePoint" />
+            <mxPoint x="1045" y="740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m13" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;" value="&lt;b&gt;13.&lt;/b&gt; HGET ric:price:EUR= (current snapshot from cache) → publish to topic">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="785" as="sourcePoint" />
+            <mxPoint x="1505" y="785" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="loop_box" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;" value="&lt;b&gt;loop&lt;/b&gt;  [steady state — LSEG pushes UpdateMsg per tick]" vertex="1">
+          <mxGeometry height="120" width="900" x="540" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="m14" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" value="&lt;b&gt;14.&lt;/b&gt; UpdateMsg (bid, ask, timestamp)">
+          <mxGeometry as="geometry">
+            <mxPoint x="1275" y="880" as="sourcePoint" />
+            <mxPoint x="585" y="880" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m15" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" value="&lt;b&gt;15.&lt;/b&gt; publish tick → market-data-updates  (LCM MS consumes)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="925" as="sourcePoint" />
+            <mxPoint x="1505" y="925" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="3. Sequence — Steady State Tick Flow" id="1Bd8SsjdcqmU_b-48JTV">
+    <mxGraphModel dx="1471" dy="889" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title3" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" value="&lt;b&gt;Sequence — Steady State Tick Flow&lt;/b&gt;&#xa;LSEG pushes a market data update; adapter relays it through internal pipeline to consumers" vertex="1">
+          <mxGeometry height="50" width="1600" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="t_lseg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;LSEG EMA&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="50" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t_omm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;OmmConsumer&lt;/b&gt;&#xa;(Pod 1)" vertex="1">
+          <mxGeometry height="50" width="150" x="280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t_sm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;Subscription&lt;/b&gt;&#xa;&lt;b&gt;Manager&lt;/b&gt; (Pod 1)" vertex="1">
+          <mxGeometry height="50" width="150" x="510" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t_redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;Redis&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="740" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t_kp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;&lt;b&gt;Producer&lt;/b&gt; (Pod 1)" vertex="1">
+          <mxGeometry height="50" width="150" x="970" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t_kupd" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-updates" vertex="1">
+          <mxGeometry height="50" width="150" x="1200" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t_trading" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;LCM MS&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="1448" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t_ll_lseg" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="125" y="135" as="sourcePoint" />
+            <mxPoint x="125" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_ll_omm" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;">
+          <mxGeometry as="geometry">
+            <mxPoint x="355" y="135" as="sourcePoint" />
+            <mxPoint x="355" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_ll_sm" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="135" as="sourcePoint" />
+            <mxPoint x="585" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_ll_redis" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;">
+          <mxGeometry as="geometry">
+            <mxPoint x="815" y="135" as="sourcePoint" />
+            <mxPoint x="815" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_ll_kp" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1045" y="135" as="sourcePoint" />
+            <mxPoint x="1045" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_ll_kupd" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1275" y="135" as="sourcePoint" />
+            <mxPoint x="1275" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_ll_trading" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#9673a6;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1523" y="135" as="sourcePoint" />
+            <mxPoint x="1523" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_loop" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;" value="&lt;b&gt;loop&lt;/b&gt;  [per tick — typically 10–1000s of msg/sec per RIC]" vertex="1">
+          <mxGeometry height="600" width="1480" x="100" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="t_m1" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" value="&lt;b&gt;1.&lt;/b&gt; UpdateMsg(RIC=&quot;EUR=&quot;, bid=1.0853, ask=1.0854, ts)">
+          <mxGeometry as="geometry">
+            <mxPoint x="125" y="220" as="sourcePoint" />
+            <mxPoint x="355" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m2" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;2.&lt;/b&gt; onUpdateMsg() — invoke OmmConsumerClient callback">
+          <mxGeometry as="geometry">
+            <mxPoint x="355" y="280" as="sourcePoint" />
+            <mxPoint x="585" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m3" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;3.&lt;/b&gt; HSET ric:price:EUR= bid 1.0853 ask 1.0854  (TTL 60s)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="340" as="sourcePoint" />
+            <mxPoint x="815" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m4" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;4.&lt;/b&gt; SET ric:last-published:EUR= = now  (gap tracking)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="395" as="sourcePoint" />
+            <mxPoint x="815" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m5" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;5.&lt;/b&gt; build MarketDataEvent  →  invoke producer.send()">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="450" as="sourcePoint" />
+            <mxPoint x="1045" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m6" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" value="&lt;b&gt;6.&lt;/b&gt; producer.send(record, key=&quot;EUR=&quot;) — transactional, exactly-once">
+          <mxGeometry as="geometry">
+            <mxPoint x="1045" y="510" as="sourcePoint" />
+            <mxPoint x="1275" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m7" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#d79b00;" value="&lt;b&gt;7.&lt;/b&gt; ack — offset committed">
+          <mxGeometry as="geometry">
+            <mxPoint x="1275" y="555" as="sourcePoint" />
+            <mxPoint x="1045" y="555" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m8" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#9673a6;strokeWidth=2;" value="&lt;b&gt;8.&lt;/b&gt; deliver to subscriber group — LCM MS poll()">
+          <mxGeometry as="geometry">
+            <mxPoint x="1275" y="615" as="sourcePoint" />
+            <mxPoint x="1518" y="612" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_m9" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#9673a6;" value="&lt;b&gt;9.&lt;/b&gt; LCM MS commits offset → business logic (price routing, orderbook update, ...)">
+          <mxGeometry as="geometry">
+            <mxPoint x="1505" y="675" as="sourcePoint" />
+            <mxPoint x="1275" y="675" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="4. Sequence — Failover to Warm Standby" id="sPCQytdLKkJvYqwqps80">
+    <mxGraphModel dx="896" dy="541" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title4" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" value="&lt;b&gt;Sequence — Pod 1 Crash → Failover to Warm Standby (Pod 2)&lt;/b&gt;&#xa;Pod 2 already holds an EMA session (login #2) — only needs to send ReqMsg for all RICs to take over" vertex="1">
+          <mxGeometry height="50" width="1600" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="f_pod1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;Pod 1&lt;/b&gt;&#xa;(LEADER, dying)" vertex="1">
+          <mxGeometry height="50" width="150" x="50" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f_redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;Redis&lt;/b&gt;&#xa;leader:lock" vertex="1">
+          <mxGeometry height="50" width="150" x="280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f_pod2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;Pod 2&lt;/b&gt;&#xa;(WARM STANDBY)" vertex="1">
+          <mxGeometry height="50" width="150" x="510" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f_pg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&#xa;ric_registry" vertex="1">
+          <mxGeometry height="50" width="150" x="740" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f_lseg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;LSEG EMA&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="970" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f_kctrl" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-control" vertex="1">
+          <mxGeometry height="50" width="150" x="1200" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f_kupd" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-updates" vertex="1">
+          <mxGeometry height="50" width="150" x="1430" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f_ll_pod1" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;">
+          <mxGeometry as="geometry">
+            <mxPoint x="125" y="135" as="sourcePoint" />
+            <mxPoint x="125" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_ll_redis" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;">
+          <mxGeometry as="geometry">
+            <mxPoint x="355" y="135" as="sourcePoint" />
+            <mxPoint x="355" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_ll_pod2" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;strokeWidth=2;">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="135" as="sourcePoint" />
+            <mxPoint x="585" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_ll_pg" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="815" y="135" as="sourcePoint" />
+            <mxPoint x="815" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_ll_lseg" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1045" y="135" as="sourcePoint" />
+            <mxPoint x="1045" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_ll_kctrl" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1275" y="135" as="sourcePoint" />
+            <mxPoint x="1275" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_ll_kupd" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1505" y="135" as="sourcePoint" />
+            <mxPoint x="1505" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m1" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;1.&lt;/b&gt; renew leader:lock (heartbeat, every 2s)  ← ongoing">
+          <mxGeometry as="geometry">
+            <mxPoint x="125" y="175" as="sourcePoint" />
+            <mxPoint x="355" y="175" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_crash" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;verticalAlign=middle;" value="&lt;b&gt;💥 t = 0s — Pod 1 CRASHES&lt;/b&gt;&#xa;(OOM kill, node eviction, network partition...)&#xa;LSEG detects TCP reset and closes EMA stream from its side" vertex="1">
+          <mxGeometry height="60" width="300" x="50" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="f_m2" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#b85450;strokeWidth=2;fontStyle=2;" value="&lt;b&gt;2.&lt;/b&gt; heartbeat STOPS (Pod 1 dead)">
+          <mxGeometry as="geometry">
+            <mxPoint x="125" y="290" as="sourcePoint" />
+            <mxPoint x="355" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_wait" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;fontStyle=2;" value="&lt;b&gt;⏱ t = 0–5s&lt;/b&gt;  Redis leader:lock TTL counts down. Pod 2 and Pods 3/4 spin-wait, attempting SETNX every 1s." vertex="1">
+          <mxGeometry height="35" width="1480" x="100" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="f_m3" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#b85450;fontStyle=1;" value="&lt;b&gt;3.&lt;/b&gt; t=5s — leader:lock TTL expires (key auto-deleted)">
+          <mxGeometry as="geometry">
+            <mxPoint x="355" y="370" as="sourcePoint" />
+            <mxPoint x="355" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m4" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;strokeWidth=2;" value="&lt;b&gt;4.&lt;/b&gt; SETNX leader:lock pod2 EX 5  →  OK (Pod 2 wins election)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="410" as="sourcePoint" />
+            <mxPoint x="355" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m5" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;fontStyle=2;" value="&lt;b&gt;5.&lt;/b&gt; onPromotedToLeader() — fires Spring application event in Pod 2">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="445" as="sourcePoint" />
+            <mxPoint x="700" y="445" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m6" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;" value="&lt;b&gt;6.&lt;/b&gt; SELECT ric FROM ric_registry WHERE active = true">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="485" as="sourcePoint" />
+            <mxPoint x="815" y="485" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m7" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#6c8ebf;" value="&lt;b&gt;7.&lt;/b&gt; [EUR=, GBP=, USDJPY=, ...]   (all RICs to resubscribe)">
+          <mxGeometry as="geometry">
+            <mxPoint x="815" y="520" as="sourcePoint" />
+            <mxPoint x="585" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_note_warm" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;verticalAlign=middle;fontStyle=1;" value="&lt;b&gt;⚡ Key point: Pod 2 already has an EMA session OPEN (login #2). NO new login required — go straight to subscribe.&lt;/b&gt;" vertex="1">
+          <mxGeometry height="35" width="1480" x="100" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="f_m8" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;" value="&lt;b&gt;8.&lt;/b&gt; ReqMsg batch for all RICs  →  send via existing OmmConsumer">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="605" as="sourcePoint" />
+            <mxPoint x="1045" y="605" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m9" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" value="&lt;b&gt;9.&lt;/b&gt; RefreshMsg snapshots for each RIC (current bid/ask)">
+          <mxGeometry as="geometry">
+            <mxPoint x="1045" y="650" as="sourcePoint" />
+            <mxPoint x="585" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m10" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;" value="&lt;b&gt;10.&lt;/b&gt; for each RIC: GET ric:last-published:{ric}  →  compute gap window (start_ts, end_ts)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="700" as="sourcePoint" />
+            <mxPoint x="355" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m11" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" value="&lt;b&gt;11.&lt;/b&gt; publish GAP_DETECTED { ric, gap_start, gap_end, new_leader: pod-2 }  →  market-data-control">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="745" as="sourcePoint" />
+            <mxPoint x="1275" y="745" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_m12" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" value="&lt;b&gt;12.&lt;/b&gt; publish snapshot tick per RIC  →  market-data-updates  (downstream catches up)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="790" as="sourcePoint" />
+            <mxPoint x="1505" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f_recovered" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;verticalAlign=middle;fontStyle=1;" value="&lt;b&gt;✅ t ≈ 7s — Pod 2 is now the active leader.  Total downtime ≈ 5–7 seconds.&lt;/b&gt;" vertex="1">
+          <mxGeometry height="35" width="1480" x="100" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="f_loop" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;" value="&lt;b&gt;loop&lt;/b&gt;  [Pod 2 takes over heartbeat]" vertex="1">
+          <mxGeometry height="90" width="380" x="280" y="875" as="geometry" />
+        </mxCell>
+        <mxCell id="f_m13" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;strokeWidth=2;" value="&lt;b&gt;13.&lt;/b&gt; EXPIRE leader:lock 5  (every 2s)">
+          <mxGeometry as="geometry">
+            <mxPoint x="585" y="920" as="sourcePoint" />
+            <mxPoint x="355" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="5. Sequence — Unsubscribe &amp; Token Refresh" id="XKP43klfAFwmZD0Ljp9a">
+    <mxGraphModel dx="1212" dy="732" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1300" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title5" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" value="&lt;b&gt;Sequence — Unsubscribe (top)   &amp;   OAuth2 Token Refresh (bottom)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="1600" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="u_title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;spacingLeft=10;fontStyle=1;" value="&lt;b&gt;A. Unsubscribe Flow&lt;/b&gt;  —  business MS no longer needs a RIC; decrement refcount and close LSEG stream if no consumers remain" vertex="1">
+          <mxGeometry height="30" width="1600" x="40" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="u_trading" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;LCM MS&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="50" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="u_kreq" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-requests" vertex="1">
+          <mxGeometry height="50" width="140" x="270" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="u_adapter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;Pod 1 Adapter&lt;/b&gt;&#xa;(LEADER)" vertex="1">
+          <mxGeometry height="50" width="140" x="490" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="u_pg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;PostgreSQL&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="710" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="u_redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;Redis&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="930" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="u_lseg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;LSEG EMA&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="1150" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="u_ll_trading" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#9673a6;">
+          <mxGeometry as="geometry">
+            <mxPoint x="120" y="160" as="sourcePoint" />
+            <mxPoint x="120" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_ll_kreq" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;">
+          <mxGeometry as="geometry">
+            <mxPoint x="340" y="160" as="sourcePoint" />
+            <mxPoint x="340" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_ll_adapter" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;strokeWidth=2;">
+          <mxGeometry as="geometry">
+            <mxPoint x="560" y="160" as="sourcePoint" />
+            <mxPoint x="560" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_ll_pg" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="780" y="160" as="sourcePoint" />
+            <mxPoint x="780" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_ll_redis" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1000" y="160" as="sourcePoint" />
+            <mxPoint x="1000" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_ll_lseg" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1220" y="160" as="sourcePoint" />
+            <mxPoint x="1220" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m1" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#9673a6;strokeWidth=2;" value="&lt;b&gt;1.&lt;/b&gt; publish { ric: &quot;EUR=&quot;, action: UNSUBSCRIBE, requester: &quot;lcm-ms&quot; }">
+          <mxGeometry as="geometry">
+            <mxPoint x="120" y="190" as="sourcePoint" />
+            <mxPoint x="340" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m2" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" value="&lt;b&gt;2.&lt;/b&gt; consume unsubscribe request">
+          <mxGeometry as="geometry">
+            <mxPoint x="340" y="230" as="sourcePoint" />
+            <mxPoint x="560" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m3" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;3.&lt;/b&gt; DELETE FROM subscription_requests WHERE ms=&#39;trading-ms&#39; AND ric=&#39;EUR=&#39;">
+          <mxGeometry as="geometry">
+            <mxPoint x="560" y="275" as="sourcePoint" />
+            <mxPoint x="780" y="275" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m4" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;4.&lt;/b&gt; DECR subscription:refcount:EUR=  →  returns new value">
+          <mxGeometry as="geometry">
+            <mxPoint x="560" y="320" as="sourcePoint" />
+            <mxPoint x="1000" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m4b" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#d6b656;" value="&lt;b&gt;5.&lt;/b&gt; new_refcount = 0">
+          <mxGeometry as="geometry">
+            <mxPoint x="1000" y="355" as="sourcePoint" />
+            <mxPoint x="560" y="355" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_alt" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;" value="&lt;b&gt;alt&lt;/b&gt;  [refcount == 0 → no MS still needs this RIC, close LSEG stream]" vertex="1">
+          <mxGeometry height="195" width="800" x="510" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="u_m5" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;6.&lt;/b&gt; SREM ric:active &quot;EUR=&quot;   &amp;   DEL ric:price:EUR=  ric:last-published:EUR=">
+          <mxGeometry as="geometry">
+            <mxPoint x="560" y="425" as="sourcePoint" />
+            <mxPoint x="1000" y="425" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m6" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;7.&lt;/b&gt; UPDATE ric_registry SET active = false WHERE ric = &#39;EUR=&#39;">
+          <mxGeometry as="geometry">
+            <mxPoint x="560" y="465" as="sourcePoint" />
+            <mxPoint x="780" y="465" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m7" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;" value="&lt;b&gt;8.&lt;/b&gt; CloseMsg / handle.close()  —  close EMA stream for this RIC (frees server resources)">
+          <mxGeometry as="geometry">
+            <mxPoint x="560" y="510" as="sourcePoint" />
+            <mxPoint x="1220" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_m8" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#6c8ebf;" value="&lt;b&gt;9.&lt;/b&gt; Status code &quot;Closed&quot; ack">
+          <mxGeometry as="geometry">
+            <mxPoint x="1220" y="550" as="sourcePoint" />
+            <mxPoint x="560" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;spacingLeft=10;fontStyle=1;" value="&lt;b&gt;B. OAuth2 Token Refresh Flow&lt;/b&gt;  —  active leader proactively refreshes token before expiry; both Pod 1 and Pod 2 rotate their EMA session token via Redis" vertex="1">
+          <mxGeometry height="30" width="1600" x="40" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="r_auth1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;LSEG Auth Service&lt;/b&gt;&#xa;(Pod 1 — leader)" vertex="1">
+          <mxGeometry height="50" width="160" x="50" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="r_oauth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;LSEG OAuth2&lt;/b&gt;&#xa;Token Endpoint" vertex="1">
+          <mxGeometry height="50" width="160" x="290" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="r_rds" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;Redis&lt;/b&gt;&#xa;lseg:auth:token" vertex="1">
+          <mxGeometry height="50" width="160" x="530" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="r_omm1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;OmmConsumer&lt;/b&gt;&#xa;(Pod 1 — active)" vertex="1">
+          <mxGeometry height="50" width="160" x="770" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="r_auth2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;LSEG Auth Service&lt;/b&gt;&#xa;(Pod 2 — warm)" vertex="1">
+          <mxGeometry height="50" width="160" x="1010" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="r_omm2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;OmmConsumer&lt;/b&gt;&#xa;(Pod 2 — warm)" vertex="1">
+          <mxGeometry height="50" width="160" x="1250" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="r_ll_auth1" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;">
+          <mxGeometry as="geometry">
+            <mxPoint x="130" y="735" as="sourcePoint" />
+            <mxPoint x="130" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_ll_oauth" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;">
+          <mxGeometry as="geometry">
+            <mxPoint x="370" y="735" as="sourcePoint" />
+            <mxPoint x="370" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_ll_rds" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;strokeWidth=2;">
+          <mxGeometry as="geometry">
+            <mxPoint x="610" y="735" as="sourcePoint" />
+            <mxPoint x="610" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_ll_omm1" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;">
+          <mxGeometry as="geometry">
+            <mxPoint x="850" y="735" as="sourcePoint" />
+            <mxPoint x="850" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_ll_auth2" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1090" y="735" as="sourcePoint" />
+            <mxPoint x="1090" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_ll_omm2" edge="1" parent="1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;">
+          <mxGeometry as="geometry">
+            <mxPoint x="1330" y="735" as="sourcePoint" />
+            <mxPoint x="1330" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_trigger" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;verticalAlign=middle;fontStyle=1;" value="&lt;b&gt;⏰ Scheduled @Scheduled(fixedDelay=60s) — leader checks token TTL&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="700" x="50" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="r_m1" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;fontStyle=2;" value="&lt;b&gt;1.&lt;/b&gt; check expiry: token expires in &lt; 5 min  →  proactively refresh">
+          <mxGeometry as="geometry">
+            <mxPoint x="130" y="820" as="sourcePoint" />
+            <mxPoint x="250" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_m2" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;2.&lt;/b&gt; POST /token  (grant_type=refresh_token, refresh_token=...)">
+          <mxGeometry as="geometry">
+            <mxPoint x="130" y="860" as="sourcePoint" />
+            <mxPoint x="370" y="860" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_m3" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" value="&lt;b&gt;3.&lt;/b&gt; { access_token: &quot;eyJ...&quot;, expires_in: 3600, refresh_token: &quot;...&quot; }">
+          <mxGeometry as="geometry">
+            <mxPoint x="370" y="900" as="sourcePoint" />
+            <mxPoint x="130" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_m4" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;" value="&lt;b&gt;4.&lt;/b&gt; SET lseg:auth:token &quot;eyJ...&quot; EX 3540 (~1 min early to allow propagation)">
+          <mxGeometry as="geometry">
+            <mxPoint x="130" y="945" as="sourcePoint" />
+            <mxPoint x="610" y="945" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_m5" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" value="&lt;b&gt;5.&lt;/b&gt; rotate token on active EMA session&#xa;(EmaConfig.username/password update)">
+          <mxGeometry as="geometry">
+            <mxPoint x="130" y="990" as="sourcePoint" />
+            <mxPoint x="850" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_note" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;fontStyle=1;" value="&lt;b&gt;📢 Pod 2 polls Redis every 30s for token changes — or uses Redis pub/sub for instant notification&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="800" x="610" y="1030" as="geometry" />
+        </mxCell>
+        <mxCell id="r_m6" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;" value="&lt;b&gt;6.&lt;/b&gt; Pod 2 detects token change  →  GET lseg:auth:token">
+          <mxGeometry as="geometry">
+            <mxPoint x="1090" y="1080" as="sourcePoint" />
+            <mxPoint x="610" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_m7" edge="1" parent="1" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#d6b656;" value="&lt;b&gt;7.&lt;/b&gt; &quot;eyJ...&quot; (new token)">
+          <mxGeometry as="geometry">
+            <mxPoint x="610" y="1115" as="sourcePoint" />
+            <mxPoint x="1090" y="1115" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_m8" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;strokeWidth=2;" value="&lt;b&gt;8.&lt;/b&gt; rotate token on warm EMA session  →  Pod 2 stays logged-in">
+          <mxGeometry as="geometry">
+            <mxPoint x="1090" y="1155" as="sourcePoint" />
+            <mxPoint x="1330" y="1155" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r_done" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;verticalAlign=middle;fontStyle=1;" value="&lt;b&gt;✅ Both EMA sessions now use the refreshed token — no disconnect, no resubscription needed&lt;/b&gt;" vertex="1">
+          <mxGeometry height="35" width="1400" x="50" y="1200" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="6. Workflow — Subscription Lifecycle" id="fxEQWZ4R2sKZ_4MwYpuz">
+    <mxGraphModel dx="2060" dy="1244" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="w6_title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" value="&lt;b&gt;Workflow — Subscription Lifecycle (state machine per RIC)&lt;/b&gt;&#xa;State is shared across pods via Redis (ric:active) and PostgreSQL (ric_registry); transitions are driven by business MS requests, EMA callbacks, and refcount changes" vertex="1">
+          <mxGeometry height="60" width="1300" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="628" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_req" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" value="&lt;b&gt;REQUESTED&lt;/b&gt;&#xa;&#xa;Business MS published&#xa;SUBSCRIBE; refcount incremented&#xa;in Redis and PostgreSQL" vertex="1">
+          <mxGeometry height="100" width="436" x="425" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_sub" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" value="&lt;b&gt;SUBSCRIBING&lt;/b&gt;&#xa;&#xa;ReqMsg sent via EMA;&#xa;awaiting RefreshMsg snapshot" vertex="1">
+          <mxGeometry height="100" width="250" x="500" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_active" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;fontStyle=1;" value="&lt;b&gt;ACTIVE&lt;/b&gt;&#xa;&#xa;Live UpdateMsg ticks flowing&#xa;through to market-data-updates;&#xa;cached in ric:price" vertex="1">
+          <mxGeometry height="110" width="437" x="418" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_drain" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=center;" value="&lt;b&gt;DRAINING&lt;/b&gt;&#xa;&#xa;refcount reached 0;&#xa;awaiting grace period&#xa;(default 30s) before close" vertex="1">
+          <mxGeometry height="100" width="250" x="500" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_closed" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=center;" value="&lt;b&gt;CLOSED&lt;/b&gt;&#xa;&#xa;CloseMsg sent;&#xa;ric_registry.active = false;&#xa;Redis keys purged" vertex="1">
+          <mxGeometry height="100" width="250" x="500" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_error" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" value="&lt;b&gt;ERROR&lt;/b&gt;&#xa;&#xa;LSEG returned StatusMsg:&#xa;DENIED / NOT_FOUND / SUSPECT&#xa;Logged to subscription_audit" vertex="1">
+          <mxGeometry height="100" width="250" x="1099" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="610" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_end_dot" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="14" width="14" x="618" y="1068" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_t1" edge="1" parent="1" source="w6_start" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w6_req" value="business MS sends&#xa;SUBSCRIBE request">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_t2" edge="1" parent="1" source="w6_req" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;strokeWidth=2;exitX=0.4;exitY=1;entryX=0.4;entryY=0;" target="w6_sub" value="&lt;b&gt;[refcount was 0]&lt;/b&gt;&#xa;first subscriber → send ReqMsg to LSEG">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_t3" edge="1" parent="1" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;exitX=0.85;exitY=1;entryX=0.85;entryY=0;" value="&lt;b&gt;[refcount &gt; 0]&lt;/b&gt;&#xa;already subscribed →&#xa;publish cached snapshot">
+          <mxGeometry relative="1" x="0.5692" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="786.5" y="290" as="sourcePoint" />
+            <mxPoint x="786.5" y="550" as="targetPoint" />
+          </mxGeometry>
+          <Array as="points">
+            <mxPoint x="900" y="320" />
+            <mxPoint x="900" y="500" />
+          </Array>
+        </mxCell>
+        <mxCell id="w6_t4" edge="1" parent="1" source="w6_sub" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.472;entryY=0.033;entryDx=0;entryDy=0;entryPerimeter=0;" target="w6_active" value="RefreshMsg received&#xa;(snapshot complete)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_t5" edge="1" parent="1" source="w6_sub" style="endArrow=classic;html=1;fontSize=10;strokeColor=#b85450;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="w6_error" value="StatusMsg: DENIED /&#xa;NOT_FOUND / SUSPECT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_t6" edge="1" parent="1" source="w6_active" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#82b366;exitX=0;exitY=0.5;entryX=0;entryY=0.7;" target="w6_active" value="new SUBSCRIBE arrives&#xa;(refcount++)&#xa;[self-loop, no transition]">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="420" y="605" />
+            <mxPoint x="420" y="635" />
+          </Array>
+        </mxCell>
+        <mxCell id="w6_t7" edge="1" parent="1" source="w6_active" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w6_drain" value="UNSUBSCRIBE arrives →&#xa;refcount reaches 0">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_t8" edge="1" parent="1" source="w6_drain" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#82b366;exitX=1;exitY=0.3;entryX=1;entryY=0.7;" target="w6_active" value="new SUBSCRIBE during&#xa;drain → abort close">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="830" y="770" />
+            <mxPoint x="830" y="650" />
+          </Array>
+        </mxCell>
+        <mxCell id="w6_t9" edge="1" parent="1" source="w6_drain" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w6_closed" value="grace period elapsed →&#xa;send CloseMsg to EMA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_t10" edge="1" parent="1" source="w6_error" style="endArrow=classic;dashed=1;html=1;fontSize=10;strokeColor=#b85450;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="w6_req" value="retry after 60s&#xa;(transient error)">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="850" y="240" />
+          </Array>
+        </mxCell>
+        <mxCell id="w6_t11" edge="1" parent="1" source="w6_closed" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w6_end" value="end of lifecycle">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w6_legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;fontSize=10;align=left;spacingLeft=10;verticalAlign=middle;" value="&lt;b&gt;Notes&lt;/b&gt;&#xa;&#xa;•  refcount is stored in &lt;b&gt;subscription:refcount:{ric}&lt;/b&gt; (Redis), durable in &lt;b&gt;subscription_requests&lt;/b&gt; (PG)&#xa;•  Grace period in DRAINING (default 30s) prevents thrashing when a MS unsubscribes and another subscribes within a window&#xa;•  ERROR is logged to &lt;b&gt;subscription_audit&lt;/b&gt; with the StatusMsg payload; manual intervention required for permanent errors&#xa;•  On failover, all ACTIVE RICs return to SUBSCRIBING (Pod 2 re-sends ReqMsg using its warm EMA session)" vertex="1">
+          <mxGeometry height="220" width="450" x="900" y="550" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="7. Workflow — Pod State / Leader Election" id="iQ78Cp8z_9SJnfxlXglu">
+    <mxGraphModel dx="1144" dy="691" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1150" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="w7_title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" value="&lt;b&gt;Workflow — Pod State Machine (Leader Election)&lt;/b&gt;&#xa;Role assignment: pod-0 &amp; pod-1 = warm-eligible (open LSEG session even if not leader);  pod-2 &amp; pod-3 = cold (no LSEG session unless promoted)" vertex="1">
+          <mxGeometry height="60" width="1400" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="725" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_starting" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=center;" value="&lt;b&gt;STARTING&lt;/b&gt;&#xa;&#xa;JVM boot, Spring context load,&#xa;Redis &amp; PG connections established" vertex="1">
+          <mxGeometry height="90" width="240" x="620" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_competing" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" value="&lt;b&gt;COMPETING&lt;/b&gt;&#xa;&#xa;Loop: attempt SETNX leader:lock {pod-id} EX 5&#xa;Inspect role config (warm-eligible / cold)" vertex="1">
+          <mxGeometry height="90" width="240" x="620" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_leader" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;fontStyle=1;" value="&lt;b&gt;🟢 LEADER&lt;/b&gt;&#xa;&#xa;Holds leader:lock&#xa;Opens EMA session (login #1)&#xa;Subscribes to all RICs in registry&#xa;Publishes ticks to Kafka&#xa;Renews lock every 2s" vertex="1">
+          <mxGeometry height="140" width="240" x="80" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_warm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;fontStyle=1;" value="&lt;b&gt;🟡 WARM_STANDBY&lt;/b&gt;&#xa;&#xa;Lost election, role = warm-eligible&#xa;Opens EMA session (login #2)&#xa;NO subscriptions sent&#xa;Watches leader:lock TTL&#xa;Polls token from Redis" vertex="1">
+          <mxGeometry height="140" width="240" x="620" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_cold" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=center;" value="&lt;b&gt;⚪ COLD_STANDBY&lt;/b&gt;&#xa;&#xa;Lost election, role = cold-only&#xa;NO LSEG session, NO login charge&#xa;Watches leader:lock TTL&#xa;Ready to be promoted (cold path)" vertex="1">
+          <mxGeometry height="140" width="240" x="1160" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_degraded" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" value="&lt;b&gt;⚠ DEGRADED&lt;/b&gt;&#xa;&#xa;EMA stream disconnected unexpectedly&#xa;(LSEG-side reset, transient network)&#xa;Reconnecting (EMA auto-reconnect + manual ReqMsg replay)&#xa;Lock still held — pod is leader but not serving" vertex="1">
+          <mxGeometry height="140" width="240" x="80" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_terminating" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontSize=10;align=center;" value="&lt;b&gt;TERMINATING&lt;/b&gt;&#xa;&#xa;SIGTERM received from OpenShift&#xa;Releases leader:lock (DEL)&#xa;Closes EMA session gracefully (UnregisterAll)&#xa;Flushes Kafka producer&#xa;Pre-stop hook completes" vertex="1">
+          <mxGeometry height="130" width="240" x="620" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="725" y="1085" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_end_dot" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="14" width="14" x="733" y="1093" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_t1" edge="1" parent="1" source="w7_start" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w7_starting" value="context ready">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_t2" edge="1" parent="1" source="w7_starting" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w7_competing" value="readiness probe OK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_t3" edge="1" parent="1" source="w7_competing" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;exitX=0;exitY=1;entryX=1;entryY=0;" target="w7_leader" value="&lt;b&gt;[SETNX succeeds]&lt;/b&gt;&#xa;won election">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_t4" edge="1" parent="1" source="w7_competing" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w7_warm" value="&lt;b&gt;[lock held, role=warm]&lt;/b&gt;&#xa;lost election, open EMA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_t5" edge="1" parent="1" source="w7_competing" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;strokeWidth=2;exitX=1;exitY=1;entryX=0;entryY=0;" target="w7_cold" value="&lt;b&gt;[lock held, role=cold]&lt;/b&gt;&#xa;lost election, no EMA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_t6" edge="1" parent="1" source="w7_leader" style="endArrow=classic;html=1;fontSize=10;strokeColor=#b85450;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w7_degraded" value="EMA stream reset">
+          <mxGeometry relative="1" x="-0.2889" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w7_t7" edge="1" parent="1" source="w7_degraded" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;dashed=1;exitX=0.85;exitY=0;entryX=0.85;entryY=1;" target="w7_leader" value="reconnected + ReqMsg replayed">
+          <mxGeometry relative="1" x="-0.1556" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w7_t8" edge="1" parent="1" source="w7_warm" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;dashed=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="w7_competing" value="&lt;b&gt;[lock TTL expired]&lt;/b&gt;&#xa;leader dead → re-compete">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="900" y="430" />
+            <mxPoint x="900" y="425" />
+          </Array>
+        </mxCell>
+        <mxCell id="w7_t9" edge="1" parent="1" source="w7_cold" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;dashed=1;exitX=0;exitY=0;entryX=1;entryY=0.5;" target="w7_competing" value="&lt;b&gt;[lock TTL expired]&lt;/b&gt;&#xa;leader dead → re-compete">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="1100" y="370" />
+            <mxPoint x="1100" y="355" />
+          </Array>
+        </mxCell>
+        <mxCell id="w7_t10" edge="1" parent="1" source="w7_degraded" style="endArrow=classic;html=1;fontSize=10;strokeColor=#b85450;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" target="w7_terminating" value="reconnect failed&#xa;after N attempts">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="200" y="900" />
+            <mxPoint x="500" y="950" />
+          </Array>
+        </mxCell>
+        <mxCell id="w7_t11" edge="1" parent="1" source="w7_leader" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;exitX=0.5;exitY=1;entryX=0.4;entryY=0;" target="w7_terminating" value="SIGTERM">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="200" y="880" />
+            <mxPoint x="700" y="880" />
+          </Array>
+        </mxCell>
+        <mxCell id="w7_t12" edge="1" parent="1" source="w7_warm" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w7_terminating" value="SIGTERM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_t13" edge="1" parent="1" source="w7_cold" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;exitX=0.5;exitY=1;entryX=0.6;entryY=0;" target="w7_terminating" value="SIGTERM">
+          <mxGeometry relative="1" as="geometry" />
+          <Array as="points">
+            <mxPoint x="1280" y="880" />
+            <mxPoint x="770" y="880" />
+          </Array>
+        </mxCell>
+        <mxCell id="w7_t14" edge="1" parent="1" source="w7_terminating" style="endArrow=classic;html=1;fontSize=10;strokeColor=#666666;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="w7_end" value="pre-stop complete">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w7_legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;fontSize=10;align=left;spacingLeft=10;verticalAlign=middle;" value="&lt;b&gt;Role config (env var POD_ROLE)&lt;/b&gt;&#xa;&#xa;•  &lt;b&gt;warm-eligible&lt;/b&gt; — pod will hold an open LSEG session when not leader. &lt;br/&gt;   StatefulSet ordinal 0 and 1.&#xa;•  &lt;b&gt;cold-only&lt;/b&gt; — pod never opens LSEG session unless promoted to leader. &lt;br/&gt;   StatefulSet ordinal 2 and 3.&#xa;&#xa;&lt;b&gt;Why this design?&lt;/b&gt;&#xa;Limits LSEG login charges to exactly 2 (1 active + 1 warm).&#xa;Cold pods cost nothing but give horizontal capacity for future scale-out.&#xa;&#xa;&lt;b&gt;Lock TTL tuning&lt;/b&gt; — 5s TTL with 2s heartbeat gives ~5–7s failover.&#xa;Tighten to 3s/1s for ~3–4s failover, at risk of false failover on GC pause." vertex="1">
+          <mxGeometry height="380" width="380" x="1080" y="700" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
