@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Murex Gateway</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;--breach:#DC2626;
+  --warn:#D97706;--ok:#16A34A;--purple:#7C3AED;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted)}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-danger{background:#DC2626;color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.kpi-val{font-size:24px;font-weight:700;line-height:1.1;margin-top:4px;color:var(--text-main)}
+.kpi-val.red{color:#DC2626}.kpi-val.amber{color:#D97706}.kpi-val.green{color:#16A34A}.kpi-val.blue{color:#2563EB}.kpi-val.purple{color:#7C3AED}
+.kpi-trend{font-size:10px;color:var(--text-muted);margin-top:4px}
+.layout-3{display:grid;grid-template-columns:1fr 1fr 300px;gap:14px;margin-bottom:14px}
+.layout-2{display:grid;grid-template-columns:1fr 380px;gap:14px;margin-bottom:14px}
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.panel-hdr{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px}
+.panel-hdr h3{font-size:13px;font-weight:700;color:var(--text-main)}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ph-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ph-badge.red{background:rgba(220,38,38,.15);color:#DC2626}
+.ph-badge.amber{background:rgba(217,119,6,.15);color:#D97706}
+.ph-badge.green{background:rgba(22,163,74,.15);color:#16A34A}
+.ph-badge.blue{background:rgba(37,99,235,.15);color:#2563EB}
+.ph-badge.purple{background:rgba(124,58,237,.15);color:#7C3AED}
+
+/* GATEWAY HEALTH */
+.gw-health{padding:16px}
+.gw-stat{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.gw-stat:last-child{border-bottom:none}
+.gw-label{font-size:12px;color:var(--text-muted)}
+.gw-val{font-size:13px;font-weight:700;color:var(--text-main)}
+.gw-val.green{color:#16A34A}
+.gw-val.red{color:#DC2626}
+.gw-val.amber{color:#D97706}
+.gw-val.purple{color:#7C3AED}
+
+/* GATEWAY STATUS INDICATOR */
+.gw-status-banner{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(22,163,74,.06)}
+.gw-status-banner.warn{background:rgba(217,119,6,.06)}
+.gw-status-banner.err{background:rgba(220,38,38,.06)}
+.gw-indicator{width:14px;height:14px;border-radius:50%}
+.gw-indicator.green{background:#16A34A;box-shadow:0 0 8px rgba(22,163,74,.5)}
+.gw-indicator.amber{background:#D97706;box-shadow:0 0 8px rgba(217,119,6,.5)}
+.gw-indicator.red{background:#DC2626;box-shadow:0 0 8px rgba(220,38,38,.5)}
+.gw-status-text{font-size:13px;font-weight:700;color:var(--text-main)}
+.gw-status-sub{font-size:11px;color:var(--text-muted)}
+
+/* QUEUE */
+.queue-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)}
+.queue-item:last-child{border-bottom:none}
+.qi-id{font-family:'Consolas','Courier New',monospace;font-size:11px;color:var(--text-muted);width:130px;flex-shrink:0}
+.qi-desc{flex:1;font-size:12px;color:var(--text-main)}
+.qi-ts{font-size:10px;color:var(--text-muted);width:70px;text-align:right}
+
+/* EVENT LOG */
+.log-entry{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:11.5px}
+.log-entry:last-child{border-bottom:none}
+.log-icon{font-size:13px;flex-shrink:0;padding-top:1px}
+.log-ts{font-family:'Consolas','Courier New',monospace;font-size:10.5px;color:var(--text-muted);white-space:nowrap;width:68px;flex-shrink:0}
+.log-body{flex:1}
+.log-title{font-weight:600;color:var(--text-main)}
+.log-detail{font-size:10.5px;color:var(--text-muted);font-family:'Consolas','Courier New',monospace;margin-top:2px}
+.log-entry.sent{border-left:3px solid #7C3AED}
+.log-entry.ack{border-left:3px solid #16A34A}
+.log-entry.err{border-left:3px solid #DC2626}
+.log-entry.retry{border-left:3px solid #D97706}
+
+.sp{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.sp-green{background:rgba(22,163,74,.15);color:#16A34A}
+.sp-amber{background:rgba(217,119,6,.15);color:#D97706}
+.sp-red{background:rgba(220,38,38,.15);color:#DC2626}
+.sp-purple{background:rgba(124,58,237,.15);color:#7C3AED}
+.sp-blue{background:rgba(37,99,235,.15);color:#2563EB}
+.sp-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--row-hover)}
+tbody td{font-size:11.5px;padding:8px 12px;color:var(--text-main);white-space:nowrap}
+.td-mono{font-family:'Consolas','Courier New',monospace;font-size:11px}
+
+/* MANUAL CONTROLS */
+.controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px}
+.ctrl-btn{padding:10px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-main);font-size:12px;font-weight:600;cursor:pointer;text-align:left;transition:all .15s}
+.ctrl-btn:hover{background:var(--row-hover)}
+.ctrl-btn.danger{border-color:rgba(220,38,38,.4);color:#DC2626}
+.ctrl-btn.success{border-color:rgba(22,163,74,.4);color:#16A34A}
+.ctrl-btn .cb-icon{font-size:16px;display:block;margin-bottom:4px}
+.ctrl-btn .cb-label{font-size:11px;font-weight:700;display:block}
+.ctrl-btn .cb-sub{font-size:10px;color:var(--text-muted);font-weight:400;display:block;margin-top:2px}
+
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+.sb-dot.amber{background:#D97706}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulsing{animation:pulse 1.4s infinite}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item" onclick="location.href='alert-manager.html'"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item" onclick="location.href='event-stream.html'"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item" onclick="location.href='position-book.html'"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item" onclick="location.href='greeks-monitor.html'"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item active"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item" onclick="location.href='audit-trail.html'"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item" onclick="location.href='connectivity.html'"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item" onclick="location.href='configuration.html'"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Murex Gateway</div>
+      <div class="tb-sub">Connection health · Event queue · Dispatch log</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <span style="font-size:11px;font-weight:600;color:#16A34A" class="pulsing">● ONLINE</span>
+      <button class="btn btn-outline btn-sm">Test Connection</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Total Events Today</div><div class="kpi-val purple">12</div><div class="kpi-trend">All dispatch attempts</div></div>
+      <div class="kpi-card"><div class="kpi-label">Delivered &amp; ACK'd</div><div class="kpi-val green">10</div><div class="kpi-trend">↑ 83% success rate</div></div>
+      <div class="kpi-card"><div class="kpi-label">Pending / In-Queue</div><div class="kpi-val amber">2</div><div class="kpi-trend">Awaiting ACK</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg Latency</div><div class="kpi-val green">6ms</div><div class="kpi-trend">SLA target: &lt;50ms</div></div>
+      <div class="kpi-card"><div class="kpi-label">Last Event</div><div class="kpi-val" style="font-size:14px" id="last-ev">09:42:17</div><div class="kpi-trend">MX-20240524-0042</div></div>
+    </div>
+
+    <div class="layout-3">
+      <!-- Gateway Health -->
+      <div class="panel">
+        <div class="panel-hdr"><h3>Gateway Health</h3><div class="ph-right"><span class="ph-badge green">ONLINE</span></div></div>
+        <div class="gw-status-banner">
+          <div class="gw-indicator green pulsing"></div>
+          <div>
+            <div class="gw-status-text">Murex Production Gateway — CONNECTED</div>
+            <div class="gw-status-sub">murex-gw-prod-01.internal · Port 9701 · TLS 1.3</div>
+          </div>
+        </div>
+        <div class="gw-health">
+          <div class="gw-stat"><div class="gw-label">Connection State</div><div class="gw-val green">ESTABLISHED</div></div>
+          <div class="gw-stat"><div class="gw-label">Host</div><div class="gw-val" style="font-size:11px;font-family:monospace">murex-gw-prod-01</div></div>
+          <div class="gw-stat"><div class="gw-label">Port</div><div class="gw-val">9701</div></div>
+          <div class="gw-stat"><div class="gw-label">Protocol</div><div class="gw-val">MxML / FIX 5.0</div></div>
+          <div class="gw-stat"><div class="gw-label">TLS Version</div><div class="gw-val green">TLS 1.3</div></div>
+          <div class="gw-stat"><div class="gw-label">Uptime (today)</div><div class="gw-val green">9h 42m 17s</div></div>
+          <div class="gw-stat"><div class="gw-label">Last Heartbeat</div><div class="gw-val green" id="hb-time">09:42:17</div></div>
+          <div class="gw-stat"><div class="gw-label">Round-Trip Latency</div><div class="gw-val green">6ms</div></div>
+          <div class="gw-stat"><div class="gw-label">Reconnect Count</div><div class="gw-val">0</div></div>
+          <div class="gw-stat"><div class="gw-label">Queue Depth</div><div class="gw-val amber">2</div></div>
+          <div class="gw-stat"><div class="gw-label">Max Queue Capacity</div><div class="gw-val">500</div></div>
+          <div class="gw-stat"><div class="gw-label">Auth Method</div><div class="gw-val">Cert + Token</div></div>
+        </div>
+      </div>
+
+      <!-- Manual Controls -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="panel">
+          <div class="panel-hdr"><h3>Manual Controls</h3></div>
+          <div class="controls-grid">
+            <button class="ctrl-btn" onclick="alert('Testing Murex connection…')"><span class="cb-icon">🔌</span><span class="cb-label">Test Connection</span><span class="cb-sub">Send ping to Murex</span></button>
+            <button class="ctrl-btn" onclick="alert('Reconnecting…')"><span class="cb-icon">🔄</span><span class="cb-label">Force Reconnect</span><span class="cb-sub">Drop &amp; re-establish</span></button>
+            <button class="ctrl-btn success" onclick="alert('Queue flushed')"><span class="cb-icon">📤</span><span class="cb-label">Flush Queue</span><span class="cb-sub">Retry all pending msgs</span></button>
+            <button class="ctrl-btn" onclick="alert('Log exported')"><span class="cb-icon">📥</span><span class="cb-label">Export Log</span><span class="cb-sub">Download event log</span></button>
+            <button class="ctrl-btn" onclick="alert('Heartbeat sent')"><span class="cb-icon">💓</span><span class="cb-label">Send Heartbeat</span><span class="cb-sub">Manual heartbeat</span></button>
+            <button class="ctrl-btn danger" onclick="alert('Gateway paused — manual override')"><span class="cb-icon">⏸</span><span class="cb-label">Pause Gateway</span><span class="cb-sub">Hold all outbound msgs</span></button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hdr"><h3>Message Queue</h3><div class="ph-right"><span class="ph-badge amber">2 Pending</span></div></div>
+          <div class="queue-item">
+            <span class="sp sp-amber"><span class="sp-dot"></span>PENDING</span>
+            <div class="qi-id">MX-20240524-0043</div>
+            <div class="qi-desc" style="font-size:11px">KO USD/SGD TXN-001 · Retry 1/3</div>
+            <div class="qi-ts">09:42:22</div>
+          </div>
+          <div class="queue-item">
+            <span class="sp sp-amber"><span class="sp-dot"></span>PENDING</span>
+            <div class="qi-id">MX-20240524-0041</div>
+            <div class="qi-desc" style="font-size:11px">KI EUR/USD FXO-089 · Retry 2/3</div>
+            <div class="qi-ts">09:39:05</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="panel">
+          <div class="panel-hdr"><h3>Message Stats</h3></div>
+          <div class="gw-health">
+            <div class="gw-stat"><div class="gw-label">Sent Today</div><div class="gw-val purple">12</div></div>
+            <div class="gw-stat"><div class="gw-label">ACK'd</div><div class="gw-val green">10</div></div>
+            <div class="gw-stat"><div class="gw-label">Pending</div><div class="gw-val amber">2</div></div>
+            <div class="gw-stat"><div class="gw-label">Failed / Dropped</div><div class="gw-val">0</div></div>
+            <div class="gw-stat"><div class="gw-label">Avg ACK Time</div><div class="gw-val green">6ms</div></div>
+            <div class="gw-stat"><div class="gw-label">Max ACK Time</div><div class="gw-val amber">34ms</div></div>
+            <div class="gw-stat"><div class="gw-label">Retries</div><div class="gw-val amber">3</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><h3>Event Types (Today)</h3></div>
+          <div class="gw-health">
+            <div class="gw-stat"><div class="gw-label">Knock-Out (KO)</div><div class="gw-val purple">4</div></div>
+            <div class="gw-stat"><div class="gw-label">Knock-In (KI)</div><div class="gw-val purple">3</div></div>
+            <div class="gw-stat"><div class="gw-label">Near-Barrier Notify</div><div class="gw-val">3</div></div>
+            <div class="gw-stat"><div class="gw-label">Position Update</div><div class="gw-val">2</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Log Table -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <h3>Murex Dispatch Event Log</h3>
+        <div class="ph-right"><span class="ph-badge purple">12 Events</span><button class="btn btn-outline btn-sm">Export</button></div>
+      </div>
+      <div style="overflow-x:auto;max-height:280px;overflow-y:auto">
+        <table>
+          <thead><tr><th>Event ID</th><th>Time</th><th>Type</th><th>Trade</th><th>Pair</th><th>Barrier</th><th>Spot</th><th>Status</th><th>ACK Time</th><th>Latency</th><th>Retry</th></tr></thead>
+          <tbody>
+            <tr><td class="td-mono">MX-20240524-0043</td><td class="td-mono">09:42:22</td><td><span class="sp sp-purple">KO</span></td><td class="td-mono">TXN-001</td><td>USD/SGD</td><td>1.3500</td><td>1.3524</td><td><span class="sp sp-amber"><span class="sp-dot"></span>Pending</span></td><td>—</td><td>—</td><td>1</td></tr>
+            <tr><td class="td-mono">MX-20240524-0042</td><td class="td-mono">09:42:17</td><td><span class="sp sp-purple">KO</span></td><td class="td-mono">TXN-001</td><td>USD/SGD</td><td>1.3500</td><td>1.3524</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>09:42:17.441</td><td>8ms</td><td>0</td></tr>
+            <tr><td class="td-mono">MX-20240524-0041</td><td class="td-mono">09:39:05</td><td><span class="sp sp-blue">KI</span></td><td class="td-mono">FXO-089</td><td>EUR/USD</td><td>1.0700</td><td>1.0842</td><td><span class="sp sp-amber"><span class="sp-dot"></span>Retry 2</span></td><td>—</td><td>—</td><td>2</td></tr>
+            <tr><td class="td-mono">MX-20240524-0040</td><td class="td-mono">09:35:44</td><td><span class="sp sp-purple">KO</span></td><td class="td-mono">FXO-112</td><td>USD/JPY</td><td>152.00</td><td>151.95</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>09:35:44.821</td><td>4ms</td><td>0</td></tr>
+            <tr><td class="td-mono">MX-20240524-0039</td><td class="td-mono">09:28:11</td><td><span class="sp sp-blue">NB</span></td><td class="td-mono">FXO-145</td><td>GBP/USD</td><td>1.2400</td><td>1.2445</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>09:28:11.215</td><td>3ms</td><td>0</td></tr>
+            <tr><td class="td-mono">MX-20240524-0038</td><td class="td-mono">09:22:33</td><td><span class="sp sp-blue">KI</span></td><td class="td-mono">FXO-203</td><td>EUR/SGD</td><td>1.4200</td><td>1.4201</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>09:22:33.882</td><td>7ms</td><td>0</td></tr>
+            <tr><td class="td-mono">MX-20240524-0037</td><td class="td-mono">09:15:08</td><td><span class="sp sp-blue">NB</span></td><td class="td-mono">FXO-089</td><td>EUR/USD</td><td>1.0700</td><td>1.0724</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>09:15:08.334</td><td>5ms</td><td>0</td></tr>
+            <tr><td class="td-mono">MX-20240524-0036</td><td class="td-mono">08:55:21</td><td><span class="sp sp-purple">KO</span></td><td class="td-mono">FXO-198</td><td>AUD/USD</td><td>0.6800</td><td>0.6803</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>08:55:21.567</td><td>6ms</td><td>0</td></tr>
+            <tr><td class="td-mono">MX-20240524-0035</td><td class="td-mono">08:44:47</td><td><span class="sp sp-blue">PU</span></td><td class="td-mono">FXO-244</td><td>USD/SGD</td><td>1.3700</td><td>1.3612</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>08:44:47.991</td><td>34ms</td><td>1</td></tr>
+            <tr><td class="td-mono">MX-20240524-0034</td><td class="td-mono">08:30:19</td><td><span class="sp sp-blue">KI</span></td><td class="td-mono">FXO-231</td><td>USD/HKD</td><td>7.7500</td><td>7.7504</td><td><span class="sp sp-green"><span class="sp-dot"></span>ACK'd</span></td><td>08:30:19.224</td><td>5ms</td><td>0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot green pulsing"></div>Murex Gateway: ONLINE</div>
+    <div class="sb-item"><div class="sb-dot amber"></div>Queue Depth: 2</div>
+    <div class="sb-item">Latency: 6ms</div>
+    <div class="sb-item" style="margin-left:auto">Last Heartbeat: <span id="hb-sb">09:42:17</span></div>
+    <div class="sb-item">MxML / FIX 5.0</div>
+  </div>
+</div>
+
+<script>
+function tick(){
+  const n=new Date();
+  const s=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});
+  document.getElementById('clk').textContent=s+' SGT';
+}
+setInterval(()=>{
+  const n=new Date();
+  const s=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});
+  document.getElementById('clk').textContent=s+' SGT';
+  document.getElementById('hb-time').textContent=s;
+  document.getElementById('hb-sb').textContent=s;
+},1000);
+tick();
+</script>
+</body>
+</html>

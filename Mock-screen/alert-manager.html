@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Alert Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;--breach:#DC2626;
+  --warn:#D97706;--ok:#16A34A;--purple:#7C3AED;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column;padding:0;z-index:10}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-outline:hover{background:var(--row-hover)}
+.btn-danger{background:#DC2626;color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.theme-btn:hover{background:rgba(255,255,255,.08)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.kpi-val{font-size:26px;font-weight:700;line-height:1.1;margin-top:4px;color:var(--text-main)}
+.kpi-val.red{color:#DC2626}.kpi-val.amber{color:#D97706}.kpi-val.green{color:#16A34A}.kpi-val.blue{color:#2563EB}
+.kpi-trend{font-size:10px;color:var(--text-muted);margin-top:4px}
+
+.layout-row{display:grid;gap:14px;margin-bottom:14px}
+.layout-2{grid-template-columns:1fr 380px}
+.layout-full{grid-template-columns:1fr}
+
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.panel-hdr{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px}
+.panel-hdr h3{font-size:13px;font-weight:700;color:var(--text-main)}
+.panel-hdr .ph-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ph-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ph-badge.red{background:rgba(220,38,38,.15);color:#DC2626}
+.ph-badge.amber{background:rgba(217,119,6,.15);color:#D97706}
+.ph-badge.green{background:rgba(22,163,74,.15);color:#16A34A}
+.ph-badge.blue{background:rgba(37,99,235,.15);color:#2563EB}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--row-hover)}
+tbody td{font-size:12px;padding:9px 12px;color:var(--text-main);white-space:nowrap}
+.td-mono{font-family:'Consolas','Courier New',monospace;font-size:11px}
+
+/* STATUS PILLS */
+.sp{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.sp-green{background:rgba(22,163,74,.15);color:#16A34A}
+.sp-amber{background:rgba(217,119,6,.15);color:#D97706}
+.sp-red{background:rgba(220,38,38,.15);color:#DC2626}
+.sp-blue{background:rgba(37,99,235,.15);color:#2563EB}
+.sp-purple{background:rgba(124,58,237,.15);color:#7C3AED}
+.sp-gray{background:rgba(100,116,139,.15);color:#64748B}
+.sp-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* PRIORITY */
+.prio{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.prio-critical{background:rgba(220,38,38,.2);color:#DC2626;border:1px solid rgba(220,38,38,.3)}
+.prio-high{background:rgba(217,119,6,.2);color:#D97706;border:1px solid rgba(217,119,6,.3)}
+.prio-medium{background:rgba(37,99,235,.2);color:#2563EB;border:1px solid rgba(37,99,235,.3)}
+.prio-low{background:rgba(100,116,139,.2);color:#64748B;border:1px solid rgba(100,116,139,.3)}
+
+/* ALERT FEED */
+.alert-feed{padding:8px;max-height:340px;overflow-y:auto}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:10px 10px;border-radius:6px;margin-bottom:4px;border:1px solid var(--border)}
+.alert-item.sev-critical{border-left:3px solid #DC2626;background:rgba(220,38,38,.05)}
+.alert-item.sev-high{border-left:3px solid #D97706;background:rgba(217,119,6,.05)}
+.alert-item.sev-medium{border-left:3px solid #2563EB;background:rgba(37,99,235,.05)}
+.ai-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.dot-critical{background:#DC2626;box-shadow:0 0 6px rgba(220,38,38,.5)}
+.dot-high{background:#D97706;box-shadow:0 0 6px rgba(217,119,6,.5)}
+.dot-medium{background:#2563EB}
+.ai-body{flex:1}
+.ai-title{font-size:12px;font-weight:600;color:var(--text-main)}
+.ai-meta{font-size:10px;color:var(--text-muted);margin-top:2px}
+.ai-time{font-size:10px;color:var(--text-muted);flex-shrink:0}
+
+/* HISTORY TABLE row colors */
+.hist-critical{background:rgba(220,38,38,.04)}
+.hist-high{background:rgba(217,119,6,.04)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.filter-bar input,.filter-bar select{padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:var(--bg-main);color:var(--text-main);font-size:12px}
+.filter-bar input{width:200px}
+
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+.sb-dot.amber{background:#D97706}
+.sb-dot.red{background:#DC2626}
+
+/* ACTION BTNS */
+.action-btns{display:flex;gap:5px}
+.ab{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-main);font-size:10px;cursor:pointer;font-weight:600}
+.ab:hover{background:var(--row-hover)}
+.ab.red{border-color:rgba(220,38,38,.4);color:#DC2626}
+.ab.green{border-color:rgba(22,163,74,.4);color:#16A34A}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item active"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item" onclick="location.href='event-stream.html'"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item" onclick="location.href='position-book.html'"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item" onclick="location.href='greeks-monitor.html'"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item" onclick="location.href='murex-gateway.html'"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item" onclick="location.href='audit-trail.html'"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item" onclick="location.href='connectivity.html'"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item" onclick="location.href='configuration.html'"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Alert Manager</div>
+      <div class="tb-sub">Rules · Active Alerts · History</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <button class="btn btn-primary btn-sm" onclick="alert('New Rule dialog')">+ New Rule</button>
+      <button class="btn btn-outline btn-sm">Export</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Total Rules</div><div class="kpi-val blue">24</div><div class="kpi-trend">↑ 3 added this week</div></div>
+      <div class="kpi-card"><div class="kpi-label">Active Alerts</div><div class="kpi-val red">8</div><div class="kpi-trend">↑ 2 since last hour</div></div>
+      <div class="kpi-card"><div class="kpi-label">Critical</div><div class="kpi-val red">2</div><div class="kpi-trend">Breach events</div></div>
+      <div class="kpi-card"><div class="kpi-label">Suppressed</div><div class="kpi-val amber">3</div><div class="kpi-trend">Manual override</div></div>
+      <div class="kpi-card"><div class="kpi-label">Resolved Today</div><div class="kpi-val green">17</div><div class="kpi-trend">Avg resolve 4.2 min</div></div>
+    </div>
+
+    <!-- Alert Rules Table -->
+    <div class="layout-row layout-full" style="margin-bottom:14px">
+      <div class="panel">
+        <div class="panel-hdr">
+          <h3>Alert Rules</h3>
+          <div class="ph-right">
+            <span class="ph-badge blue">24 Rules</span>
+            <button class="btn btn-outline btn-sm">Filter</button>
+            <button class="btn btn-primary btn-sm">+ Add Rule</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" placeholder="Search rules…"/>
+          <select><option>All Types</option><option>Barrier Breach</option><option>Rate Spike</option><option>Feed Failure</option><option>Greeks Limit</option></select>
+          <select><option>All Priority</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <select><option>All Status</option><option>Active</option><option>Paused</option><option>Disabled</option></select>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Rule ID</th><th>Rule Name</th><th>Type</th><th>Condition</th><th>Threshold</th><th>Action</th><th>Priority</th><th>Cooldown</th><th>Triggered</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="td-mono">ALR-001</td><td>Barrier Breach — UIO</td><td>Barrier</td><td>Spot ≥ Barrier Level</td><td>0 bps</td><td>Murex + Email</td><td><span class="prio prio-critical">CRITICAL</span></td><td>0s</td><td>3</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-002</td><td>Near Barrier Warning</td><td>Barrier</td><td>Spot within 0.5%</td><td>50 bps</td><td>Dashboard + Email</td><td><span class="prio prio-high">HIGH</span></td><td>5 min</td><td>12</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-003</td><td>Rate Spike Detector</td><td>Rate</td><td>Move &gt; 2σ in 1min</td><td>2.0σ</td><td>Dashboard Alert</td><td><span class="prio prio-high">HIGH</span></td><td>2 min</td><td>8</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-004</td><td>LSEG Feed Latency</td><td>Feed</td><td>Latency &gt; 500ms</td><td>500ms</td><td>SMS + Email</td><td><span class="prio prio-high">HIGH</span></td><td>1 min</td><td>2</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-005</td><td>Murex Gateway Down</td><td>System</td><td>Gateway unreachable</td><td>3 retry</td><td>SMS + Escalate</td><td><span class="prio prio-critical">CRITICAL</span></td><td>0s</td><td>0</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-006</td><td>Delta Limit Breach</td><td>Greeks</td><td>Net Delta &gt; 50M</td><td>USD 50M</td><td>Risk Email</td><td><span class="prio prio-medium">MEDIUM</span></td><td>10 min</td><td>1</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-007</td><td>Unusual Vega Exposure</td><td>Greeks</td><td>Vega &gt; 2M per CCY</td><td>USD 2M</td><td>Dashboard Alert</td><td><span class="prio prio-medium">MEDIUM</span></td><td>15 min</td><td>4</td><td><span class="sp sp-amber"><span class="sp-dot"></span>Paused</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab green">Enable</button></div></td></tr>
+              <tr><td class="td-mono">ALR-008</td><td>P&amp;L Drawdown Alert</td><td>P&amp;L</td><td>Daily PnL &lt; -500K</td><td>-USD 500K</td><td>Email + Dashboard</td><td><span class="prio prio-high">HIGH</span></td><td>30 min</td><td>0</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-009</td><td>Option Expiry T-1</td><td>Maturity</td><td>Expiry in &lt; 24 hrs</td><td>24 hrs</td><td>Email Reminder</td><td><span class="prio prio-medium">MEDIUM</span></td><td>4 hrs</td><td>3</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-010</td><td>VaR Limit Utilization</td><td>Risk</td><td>VaR Util &gt; 85%</td><td>85%</td><td>Risk + Email</td><td><span class="prio prio-high">HIGH</span></td><td>1 hr</td><td>0</td><td><span class="sp sp-gray"><span class="sp-dot"></span>Disabled</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab green">Enable</button></div></td></tr>
+              <tr><td class="td-mono">ALR-011</td><td>Feed Source Failover</td><td>Feed</td><td>Primary feed down</td><td>10s timeout</td><td>Auto-Failover + SMS</td><td><span class="prio prio-critical">CRITICAL</span></td><td>0s</td><td>1</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+              <tr><td class="td-mono">ALR-012</td><td>Knock-In Event Pending</td><td>Barrier</td><td>KI barrier breached</td><td>0 bps</td><td>Murex Priority</td><td><span class="prio prio-critical">CRITICAL</span></td><td>0s</td><td>1</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td><td><div class="action-btns"><button class="ab">Edit</button><button class="ab red">Pause</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Alerts + History -->
+    <div class="layout-row layout-2">
+      <!-- Active Alerts -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <h3>Active Alerts</h3>
+          <div class="ph-right">
+            <span class="ph-badge red">8 Active</span>
+            <button class="btn btn-outline btn-sm">Ack All</button>
+          </div>
+        </div>
+        <div class="alert-feed">
+          <div class="alert-item sev-critical">
+            <div class="ai-dot dot-critical"></div>
+            <div class="ai-body">
+              <div class="ai-title">BARRIER BREACH — USD/SGD UIO · Trade TXN-20240524-001</div>
+              <div class="ai-meta">Spot 1.3524 ≥ Barrier 1.3500 · Murex event dispatched · Rule ALR-001</div>
+            </div>
+            <div><div class="ai-time">09:42:17</div><button class="ab red btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+          <div class="alert-item sev-critical">
+            <div class="ai-dot dot-critical"></div>
+            <div class="ai-body">
+              <div class="ai-title">MUREX GATEWAY — ACK Timeout (TXN-20240524-003)</div>
+              <div class="ai-meta">Event dispatched 09:38:44 · No ACK received in 30s · Retry 2/3</div>
+            </div>
+            <div><div class="ai-time">09:39:14</div><button class="ab red btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+          <div class="alert-item sev-high">
+            <div class="ai-dot dot-high"></div>
+            <div class="ai-body">
+              <div class="ai-title">NEAR BARRIER — EUR/USD DIO · Trade FXO-2024-089</div>
+              <div class="ai-meta">Distance 0.32% · Within warning band 0.5% · Rule ALR-002</div>
+            </div>
+            <div><div class="ai-time">09:41:05</div><button class="ab btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+          <div class="alert-item sev-high">
+            <div class="ai-dot dot-high"></div>
+            <div class="ai-body">
+              <div class="ai-title">RATE SPIKE — GBP/USD · +0.47% in 45 seconds</div>
+              <div class="ai-meta">Move 3.1σ · Threshold 2.0σ · Source LSEG RTDS · Rule ALR-003</div>
+            </div>
+            <div><div class="ai-time">09:40:22</div><button class="ab btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+          <div class="alert-item sev-high">
+            <div class="ai-dot dot-high"></div>
+            <div class="ai-body">
+              <div class="ai-title">NEAR BARRIER — USD/JPY UII · Trade FXO-2024-112</div>
+              <div class="ai-meta">Distance 0.18% · CRITICAL band · Rule ALR-002</div>
+            </div>
+            <div><div class="ai-time">09:40:01</div><button class="ab btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+          <div class="alert-item sev-high">
+            <div class="ai-dot dot-high"></div>
+            <div class="ai-body">
+              <div class="ai-title">LSEG LATENCY — DataScope feed 520ms spike</div>
+              <div class="ai-meta">Normal: 12ms · Current: 520ms · Threshold: 500ms · Rule ALR-004</div>
+            </div>
+            <div><div class="ai-time">09:38:55</div><button class="ab btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+          <div class="alert-item sev-medium">
+            <div class="ai-dot" style="background:#2563EB;width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px"></div>
+            <div class="ai-body">
+              <div class="ai-title">DELTA LIMIT — USD book net delta USD 52.3M</div>
+              <div class="ai-meta">Limit: USD 50M · Excess: USD 2.3M · Rule ALR-006</div>
+            </div>
+            <div><div class="ai-time">09:37:18</div><button class="ab btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+          <div class="alert-item sev-medium">
+            <div class="ai-dot" style="background:#2563EB;width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px"></div>
+            <div class="ai-body">
+              <div class="ai-title">OPTION EXPIRY — FXO-2024-067 expires in 18 hrs</div>
+              <div class="ai-meta">USD/SGD Call 1.33 · Notional USD 5M · Rule ALR-009</div>
+            </div>
+            <div><div class="ai-time">09:35:00</div><button class="ab btn-sm" style="margin-top:4px">ACK</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert History -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <h3>Alert History (Today)</h3>
+          <div class="ph-right"><span class="ph-badge green">17 Resolved</span></div>
+        </div>
+        <div class="tbl-wrap" style="max-height:340px;overflow-y:auto">
+          <table>
+            <thead><tr><th>Time</th><th>Rule</th><th>Sev</th><th>Resolution</th><th>Duration</th></tr></thead>
+            <tbody>
+              <tr class="hist-critical"><td class="td-mono">09:31:04</td><td style="font-size:11px">Barrier Breach UIO</td><td><span class="sp sp-red">CRIT</span></td><td><span class="sp sp-green">Auto-ACK</span></td><td>00:00:08</td></tr>
+              <tr class="hist-high"><td class="td-mono">09:28:33</td><td style="font-size:11px">Near Barrier Warn</td><td><span class="sp sp-amber">HIGH</span></td><td><span class="sp sp-green">Cleared</span></td><td>00:02:14</td></tr>
+              <tr><td class="td-mono">09:25:17</td><td style="font-size:11px">Rate Spike GBP/USD</td><td><span class="sp sp-amber">HIGH</span></td><td><span class="sp sp-green">Auto</span></td><td>00:01:02</td></tr>
+              <tr><td class="td-mono">09:20:44</td><td style="font-size:11px">Feed Latency RTDS</td><td><span class="sp sp-amber">HIGH</span></td><td><span class="sp sp-blue">Manual</span></td><td>00:03:30</td></tr>
+              <tr><td class="td-mono">09:15:22</td><td style="font-size:11px">Delta Limit USD</td><td><span class="sp sp-blue">MED</span></td><td><span class="sp sp-green">Cleared</span></td><td>00:05:18</td></tr>
+              <tr class="hist-critical"><td class="td-mono">09:10:09</td><td style="font-size:11px">Murex ACK Timeout</td><td><span class="sp sp-red">CRIT</span></td><td><span class="sp sp-blue">Manual</span></td><td>00:01:45</td></tr>
+              <tr><td class="td-mono">09:05:31</td><td style="font-size:11px">Option Expiry T-1</td><td><span class="sp sp-blue">MED</span></td><td><span class="sp sp-green">Auto-ACK</span></td><td>00:00:01</td></tr>
+              <tr><td class="td-mono">08:58:14</td><td style="font-size:11px">Feed Source Fail</td><td><span class="sp sp-red">CRIT</span></td><td><span class="sp sp-green">Auto-Fail</span></td><td>00:00:12</td></tr>
+              <tr><td class="td-mono">08:52:47</td><td style="font-size:11px">Near Barrier EUR/USD</td><td><span class="sp sp-amber">HIGH</span></td><td><span class="sp sp-green">Cleared</span></td><td>00:04:23</td></tr>
+              <tr><td class="td-mono">08:45:03</td><td style="font-size:11px">Rate Spike USD/JPY</td><td><span class="sp sp-amber">HIGH</span></td><td><span class="sp sp-green">Auto</span></td><td>00:00:55</td></tr>
+              <tr><td class="td-mono">08:38:21</td><td style="font-size:11px">P&amp;L Drawdown</td><td><span class="sp sp-amber">HIGH</span></td><td><span class="sp sp-blue">Manual</span></td><td>00:08:10</td></tr>
+              <tr><td class="td-mono">08:30:00</td><td style="font-size:11px">Delta Limit SGD</td><td><span class="sp sp-blue">MED</span></td><td><span class="sp sp-green">Cleared</span></td><td>00:02:44</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot green"></div>Alert Engine Running</div>
+    <div class="sb-item"><div class="sb-dot green"></div>LSEG RTDS Connected</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Murex Gateway Online</div>
+    <div class="sb-item"><div class="sb-dot amber"></div>DataScope 520ms</div>
+    <div class="sb-item" style="margin-left:auto">Rules Engine v2.4.1</div>
+    <div class="sb-item">Notification Queue: 3</div>
+  </div>
+</div>
+
+<script>
+function tick(){const n=new Date();const s=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});document.getElementById('clk').textContent=s+' SGT';}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

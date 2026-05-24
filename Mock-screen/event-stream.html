@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Event Stream</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;--breach:#DC2626;
+  --warn:#D97706;--ok:#16A34A;--purple:#7C3AED;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column;padding:0;z-index:10}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.kpi-val{font-size:26px;font-weight:700;line-height:1.1;margin-top:4px;color:var(--text-main)}
+.kpi-val.red{color:#DC2626}.kpi-val.amber{color:#D97706}.kpi-val.green{color:#16A34A}.kpi-val.blue{color:#2563EB}
+.kpi-trend{font-size:10px;color:var(--text-muted);margin-top:4px}
+.layout-2{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:14px}
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.panel-hdr{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.panel-hdr h3{font-size:13px;font-weight:700;color:var(--text-main)}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ph-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ph-badge.red{background:rgba(220,38,38,.15);color:#DC2626}
+.ph-badge.amber{background:rgba(217,119,6,.15);color:#D97706}
+.ph-badge.green{background:rgba(22,163,74,.15);color:#16A34A}
+.ph-badge.blue{background:rgba(37,99,235,.15);color:#2563EB}
+.ph-badge.purple{background:rgba(124,58,237,.15);color:#7C3AED}
+
+/* FILTER CHIPS */
+.filter-chips{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--text-muted);transition:all .15s}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.active{background:rgba(37,99,235,.2);border-color:var(--accent);color:#93C5FD}
+.chip.breach{background:rgba(220,38,38,.15);border-color:rgba(220,38,38,.4);color:#DC2626}
+.chip.murex{background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.4);color:#7C3AED}
+.chip.rate{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#16A34A}
+.chip.warn{background:rgba(217,119,6,.15);border-color:rgba(217,119,6,.4);color:#D97706}
+.chip.system{background:rgba(37,99,235,.15);border-color:rgba(37,99,235,.4);color:#2563EB}
+
+/* EVENT STREAM */
+.event-stream{padding:8px;height:420px;overflow-y:auto;font-size:11.5px}
+.event-entry{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:5px;margin-bottom:3px;border-left:3px solid transparent;transition:background .1s}
+.event-entry:hover{background:var(--row-hover)}
+.ev-breach{border-left-color:#DC2626;background:rgba(220,38,38,.04)}
+.ev-murex{border-left-color:#7C3AED;background:rgba(124,58,237,.04)}
+.ev-rate{border-left-color:#16A34A;background:rgba(22,163,74,.03)}
+.ev-warn{border-left-color:#D97706;background:rgba(217,119,6,.04)}
+.ev-system{border-left-color:#2563EB;background:rgba(37,99,235,.03)}
+.ev-ok{border-left-color:#16A34A}
+.ev-ts{font-family:'Consolas','Courier New',monospace;font-size:10.5px;color:var(--text-muted);white-space:nowrap;width:72px;flex-shrink:0;padding-top:1px}
+.ev-icon{font-size:12px;width:16px;flex-shrink:0;padding-top:1px}
+.ev-body{flex:1}
+.ev-title{font-weight:600;color:var(--text-main);font-size:12px}
+.ev-detail{color:var(--text-muted);font-size:10.5px;margin-top:2px;font-family:'Consolas','Courier New',monospace}
+.ev-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;margin-right:4px;vertical-align:middle}
+.tag-breach{background:rgba(220,38,38,.2);color:#DC2626}
+.tag-murex{background:rgba(124,58,237,.2);color:#7C3AED}
+.tag-rate{background:rgba(22,163,74,.2);color:#16A34A}
+.tag-warn{background:rgba(217,119,6,.2);color:#D97706}
+.tag-sys{background:rgba(37,99,235,.2);color:#2563EB}
+.tag-ok{background:rgba(22,163,74,.2);color:#16A34A}
+
+/* STATS PANEL */
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-label{font-size:11px;color:var(--text-muted)}
+.stat-val{font-size:13px;font-weight:700;color:var(--text-main)}
+.stat-val.red{color:#DC2626}
+.stat-val.green{color:#16A34A}
+.stat-val.amber{color:#D97706}
+.stat-val.purple{color:#7C3AED}
+
+/* MINI BAR */
+.mini-bar-wrap{margin:3px 0;background:var(--border);border-radius:3px;height:4px;overflow:hidden}
+.mini-bar{height:4px;border-radius:3px;transition:width .5s}
+
+/* PAUSE INDICATOR */
+.pause-banner{background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.3);color:#D97706;padding:5px 14px;font-size:11px;font-weight:600;display:none;text-align:center}
+.pause-banner.show{display:block}
+
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+.sb-dot.amber{background:#D97706}
+.sb-dot.red{background:#DC2626}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulsing{animation:pulse 1.2s infinite}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item" onclick="location.href='alert-manager.html'"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item active"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item" onclick="location.href='position-book.html'"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item" onclick="location.href='greeks-monitor.html'"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item" onclick="location.href='murex-gateway.html'"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item" onclick="location.href='audit-trail.html'"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item" onclick="location.href='connectivity.html'"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item" onclick="location.href='configuration.html'"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Event Stream</div>
+      <div class="tb-sub">Live feed of all system events · Auto-scrolling</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <span id="rate-badge" style="font-size:11px;color:#16A34A;font-weight:600" class="pulsing">● LIVE</span>
+      <button class="btn btn-outline btn-sm" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
+      <button class="btn btn-outline btn-sm">↓ Export</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Events Today</div><div class="kpi-val blue" id="ev-count">1,247</div><div class="kpi-trend">↑ Live updating</div></div>
+      <div class="kpi-card"><div class="kpi-label">Breach Events</div><div class="kpi-val red">3</div><div class="kpi-trend">Murex dispatched</div></div>
+      <div class="kpi-card"><div class="kpi-label">Murex Events</div><div class="kpi-val" style="color:#7C3AED">12</div><div class="kpi-trend">10 ACK'd · 2 pending</div></div>
+      <div class="kpi-card"><div class="kpi-label">Rate Events</div><div class="kpi-val green">847</div><div class="kpi-trend">4.2/sec avg</div></div>
+      <div class="kpi-card"><div class="kpi-label">System Events</div><div class="kpi-val amber">28</div><div class="kpi-trend">Warnings: 5</div></div>
+    </div>
+
+    <div class="layout-2">
+      <!-- Live Event Stream -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <h3>Live Event Stream</h3>
+          <div class="ph-right">
+            <span class="ph-badge blue" id="stream-count">1,247 events</span>
+          </div>
+        </div>
+        <div class="filter-chips">
+          <span style="font-size:11px;color:var(--text-muted);margin-right:4px">Filter:</span>
+          <span class="chip active" onclick="toggleChip(this,'all')">All</span>
+          <span class="chip breach" onclick="toggleChip(this,'breach')">⛔ Breach</span>
+          <span class="chip murex" onclick="toggleChip(this,'murex')">🔗 Murex</span>
+          <span class="chip rate" onclick="toggleChip(this,'rate')">📈 Rate</span>
+          <span class="chip warn" onclick="toggleChip(this,'warn')">⚠ Warning</span>
+          <span class="chip system" onclick="toggleChip(this,'system')">⚙ System</span>
+        </div>
+        <div id="pauseBanner" class="pause-banner">⏸ Stream paused — click Resume to continue</div>
+        <div class="event-stream" id="eventStream">
+          <!-- events injected by JS -->
+        </div>
+      </div>
+
+      <!-- Stats & Breakdown -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="panel">
+          <div class="panel-hdr"><h3>Event Breakdown</h3></div>
+          <div class="stat-row"><div><div class="stat-label">⛔ Barrier Breach</div><div class="mini-bar-wrap"><div class="mini-bar" style="width:12%;background:#DC2626"></div></div></div><div class="stat-val red">3</div></div>
+          <div class="stat-row"><div><div class="stat-label">🔗 Murex Dispatch</div><div class="mini-bar-wrap"><div class="mini-bar" style="width:18%;background:#7C3AED"></div></div></div><div class="stat-val purple">12</div></div>
+          <div class="stat-row"><div><div class="stat-label">📈 Rate Update</div><div class="mini-bar-wrap"><div class="mini-bar" style="width:88%;background:#16A34A"></div></div></div><div class="stat-val green">847</div></div>
+          <div class="stat-row"><div><div class="stat-label">⚠ Warning</div><div class="mini-bar-wrap"><div class="mini-bar" style="width:30%;background:#D97706"></div></div></div><div class="stat-val amber">28</div></div>
+          <div class="stat-row"><div><div class="stat-label">⚙ System</div><div class="mini-bar-wrap"><div class="mini-bar" style="width:15%;background:#2563EB"></div></div></div><div class="stat-val">18</div></div>
+          <div class="stat-row"><div><div class="stat-label">✅ Resolved</div><div class="mini-bar-wrap"><div class="mini-bar" style="width:40%;background:#16A34A"></div></div></div><div class="stat-val green">339</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hdr"><h3>Top Event Sources</h3></div>
+          <div class="stat-row"><div class="stat-label">LSEG RTDS Feed</div><div class="stat-val green">612</div></div>
+          <div class="stat-row"><div class="stat-label">Barrier Engine</div><div class="stat-val amber">187</div></div>
+          <div class="stat-row"><div class="stat-label">Murex Gateway</div><div class="stat-val" style="color:#7C3AED">12</div></div>
+          <div class="stat-row"><div class="stat-label">Alert Manager</div><div class="stat-val amber">28</div></div>
+          <div class="stat-row"><div class="stat-label">System Heartbeat</div><div class="stat-val">18</div></div>
+          <div class="stat-row"><div class="stat-label">LSEG DataScope</div><div class="stat-val">235</div></div>
+          <div class="stat-row"><div class="stat-label">Internal Composite</div><div class="stat-val">155</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hdr"><h3>Throughput (Events/min)</h3></div>
+          <div style="padding:14px">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Last 5 minutes</div>
+            <div style="display:flex;align-items:flex-end;gap:6px;height:50px">
+              <div style="flex:1;background:var(--accent);opacity:.7;height:60%;border-radius:2px 2px 0 0"></div>
+              <div style="flex:1;background:var(--accent);opacity:.8;height:80%;border-radius:2px 2px 0 0"></div>
+              <div style="flex:1;background:var(--accent);height:90%;border-radius:2px 2px 0 0"></div>
+              <div style="flex:1;background:var(--accent);height:70%;border-radius:2px 2px 0 0"></div>
+              <div style="flex:1;background:var(--accent);opacity:.6;height:55%;border-radius:2px 2px 0 0"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);margin-top:4px">
+              <span>-5m</span><span>-4m</span><span>-3m</span><span>-2m</span><span>Now</span>
+            </div>
+            <div style="margin-top:8px;font-size:12px;font-weight:700;color:var(--text-main)">Current: <span class="pulsing" style="color:#16A34A" id="thr">247</span> evt/min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot green"></div>Stream: LIVE</div>
+    <div class="sb-item"><div class="sb-dot green"></div>LSEG RTDS Connected</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Murex Gateway Online</div>
+    <div class="sb-item" style="margin-left:auto">Buffer: 10,000 events</div>
+    <div class="sb-item">Latency: 0.2ms</div>
+  </div>
+</div>
+
+<script>
+let paused=false;
+let evCount=1247;
+const stream=document.getElementById('eventStream');
+
+const events=[
+  {type:'breach',icon:'⛔',tag:'BREACH',tagClass:'tag-breach',cssClass:'ev-breach',title:'Barrier Breach Detected — USD/SGD UIO',detail:'trade=TXN-20240524-001  spot=1.3524  barrier=1.3500  type=UP-AND-OUT'},
+  {type:'murex',icon:'🔗',tag:'MUREX',tagClass:'tag-murex',cssClass:'ev-murex',title:'Murex Event Dispatched — Knock-Out USD/SGD',detail:'event_id=MX-20240524-0042  pair=USD/SGD  trade=TXN-001  status=SENT'},
+  {type:'rate',icon:'📊',tag:'RATE',tagClass:'tag-rate',cssClass:'ev-rate',title:'Rate Update — EUR/USD',detail:'pair=EUR/USD  bid=1.08421  ask=1.08437  src=LSEG_RTDS  latency=0.18ms'},
+  {type:'warn',icon:'⚠️',tag:'WARN',tagClass:'tag-warn',cssClass:'ev-warn',title:'Near Barrier Warning — EUR/USD DIO',detail:'trade=FXO-2024-089  distance=0.32%  threshold=0.50%  direction=DOWN'},
+  {type:'murex',icon:'✅',tag:'MUREX',tagClass:'tag-murex',cssClass:'ev-murex',title:'Murex ACK Received — MX-20240524-0042',detail:'event_id=MX-20240524-0042  ack_time=09:42:18.441  latency=8ms'},
+  {type:'rate',icon:'📊',tag:'RATE',tagClass:'tag-rate',cssClass:'ev-rate',title:'Rate Update — GBP/USD',detail:'pair=GBP/USD  bid=1.27183  ask=1.27201  src=LSEG_RTDS  latency=0.21ms'},
+  {type:'system',icon:'⚙️',tag:'SYS',tagClass:'tag-sys',cssClass:'ev-system',title:'Barrier Engine Heartbeat — All 47 positions evaluated',detail:'positions=47  breached=0  near_breach=8  elapsed=2.1ms'},
+  {type:'rate',icon:'📊',tag:'RATE',tagClass:'tag-rate',cssClass:'ev-rate',title:'Rate Update — USD/JPY',detail:'pair=USD/JPY  bid=149.872  ask=149.891  src=LSEG_RTDS  latency=0.19ms'},
+  {type:'warn',icon:'⚠️',tag:'WARN',tagClass:'tag-warn',cssClass:'ev-warn',title:'LSEG DataScope Latency Spike — 520ms',detail:'source=LSEG_DATASCOPE  latency=520ms  normal=12ms  alert=ALR-004'},
+  {type:'rate',icon:'📊',tag:'RATE',tagClass:'tag-rate',cssClass:'ev-rate',title:'Rate Update — AUD/USD',detail:'pair=AUD/USD  bid=0.65891  ask=0.65907  src=LSEG_RTDS  latency=0.20ms'},
+  {type:'system',icon:'🔔',tag:'ALERT',tagClass:'tag-sys',cssClass:'ev-system',title:'Alert Triggered — ALR-003 Rate Spike GBP/USD',detail:'rule=ALR-003  pair=GBP/USD  move=3.1σ  threshold=2.0σ  action=DASHBOARD'},
+  {type:'rate',icon:'📊',tag:'RATE',tagClass:'tag-rate',cssClass:'ev-rate',title:'Rate Update — USD/SGD',detail:'pair=USD/SGD  bid=1.35212  ask=1.35228  src=LSEG_RTDS  latency=0.17ms'},
+];
+
+function addEvent(ev){
+  const now=new Date();
+  const ts=now.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});
+  const div=document.createElement('div');
+  div.className='event-entry '+ev.cssClass;
+  div.innerHTML=`<span class="ev-ts">${ts}</span><span class="ev-icon">${ev.icon}</span><div class="ev-body"><div class="ev-title"><span class="ev-tag ${ev.tagClass}">${ev.tag}</span>${ev.title}</div><div class="ev-detail">${ev.detail}</div></div>`;
+  if(stream.firstChild)stream.insertBefore(div,stream.firstChild);
+  else stream.appendChild(div);
+  while(stream.children.length>200)stream.removeChild(stream.lastChild);
+  evCount++;
+  document.getElementById('ev-count').textContent=evCount.toLocaleString();
+  document.getElementById('stream-count').textContent=evCount.toLocaleString()+' events';
+}
+
+// Seed initial events
+const initEvents=[...events].reverse();
+initEvents.forEach(e=>addEvent(e));
+
+let evIdx=0;
+setInterval(()=>{
+  if(!paused){
+    addEvent(events[evIdx%events.length]);
+    evIdx++;
+    const thr=230+Math.floor(Math.random()*40);
+    document.getElementById('thr').textContent=thr;
+  }
+},1200);
+
+function togglePause(){
+  paused=!paused;
+  document.getElementById('pauseBtn').textContent=paused?'▶ Resume':'⏸ Pause';
+  document.getElementById('pauseBanner').classList.toggle('show',paused);
+  document.getElementById('rate-badge').textContent=paused?'⏸ PAUSED':'● LIVE';
+  document.getElementById('rate-badge').style.color=paused?'#D97706':'#16A34A';
+}
+
+function toggleChip(el,type){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function tick(){const n=new Date();document.getElementById('clk').textContent=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false})+' SGT';}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

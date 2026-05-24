@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Configuration</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;
+  --warn:#D97706;--ok:#16A34A;--breach:#DC2626;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted)}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-danger{background:#DC2626;color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:0}
+/* TABS */
+.tab-bar{display:flex;gap:0;padding:0 20px;background:var(--bg-card);border-bottom:1px solid var(--border)}
+.tab{padding:12px 18px;font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--text-main)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* TAB CONTENT */
+.tab-content{display:none;padding:20px}
+.tab-content.active{display:block}
+/* FORM */
+.form-section{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px}
+.form-section-hdr{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text-main);display:flex;align-items:center;justify-content:space-between}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.form-field{padding:14px 16px;border-bottom:1px solid var(--border)}
+.form-field:nth-child(odd){border-right:1px solid var(--border)}
+.field-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field-val{font-size:13px;color:var(--text-main)}
+.field-input{width:100%;padding:7px 10px;border-radius:5px;border:1px solid var(--border);background:var(--bg-main);color:var(--text-main);font-size:12px;margin-top:2px}
+.field-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.2)}
+.field-select{width:100%;padding:7px 10px;border-radius:5px;border:1px solid var(--border);background:var(--bg-main);color:var(--text-main);font-size:12px;margin-top:2px}
+.field-helper{font-size:10px;color:var(--text-muted);margin-top:4px}
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:12px;font-weight:600;color:var(--text-main)}
+.toggle-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.toggle{width:38px;height:20px;background:#334155;border-radius:10px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:#16A34A}
+.toggle::after{content:'';width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s}
+.toggle.on::after{transform:translateX(18px)}
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--row-hover)}
+tbody td{font-size:12px;padding:9px 12px;color:var(--text-main);white-space:nowrap}
+.td-mono{font-family:'Consolas','Courier New',monospace;font-size:11px}
+.sp{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.sp-green{background:rgba(22,163,74,.15);color:#16A34A}
+.sp-amber{background:rgba(217,119,6,.15);color:#D97706}
+.sp-blue{background:rgba(37,99,235,.15);color:#2563EB}
+/* SAVE BAR */
+.save-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(37,99,235,.08);border-top:1px solid rgba(37,99,235,.2)}
+.save-bar span{font-size:11px;color:var(--accent);font-weight:600}
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+.sb-dot.amber{background:#D97706}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item" onclick="location.href='alert-manager.html'"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item" onclick="location.href='event-stream.html'"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item" onclick="location.href='position-book.html'"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item" onclick="location.href='greeks-monitor.html'"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item" onclick="location.href='murex-gateway.html'"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item" onclick="location.href='audit-trail.html'"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item" onclick="location.href='connectivity.html'"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item active"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Configuration</div>
+      <div class="tb-sub">Barrier config · Alert thresholds · Feed settings · System</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <button class="btn btn-danger btn-sm" onclick="alert('Changes discarded')">Discard</button>
+      <button class="btn btn-primary btn-sm" onclick="alert('Configuration saved — changes logged to audit trail')">Save Changes</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('barrier')">Barrier Config</div>
+    <div class="tab" onclick="switchTab('alerts')">Alert Thresholds</div>
+    <div class="tab" onclick="switchTab('feed')">Feed Settings</div>
+    <div class="tab" onclick="switchTab('murex')">Murex Gateway</div>
+    <div class="tab" onclick="switchTab('notifications')">Notifications</div>
+    <div class="tab" onclick="switchTab('system')">System</div>
+  </div>
+
+  <div class="content">
+    <!-- BARRIER CONFIG TAB -->
+    <div id="tab-barrier" class="tab-content active">
+      <div class="form-section">
+        <div class="form-section-hdr">Barrier Engine Settings<span style="font-size:11px;color:var(--text-muted);font-weight:400">Controls how barriers are monitored and evaluated</span></div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">Evaluation Frequency</div><select class="field-select"><option>800ms (default)</option><option>500ms</option><option>1000ms</option><option>2000ms</option></select><div class="field-helper">How often barrier engine evaluates all positions</div></div>
+          <div class="form-field"><div class="field-label">Warning Distance (bps)</div><input class="field-input" type="number" value="50"/><div class="field-helper">Trigger near-breach warning when spot within N bps of barrier</div></div>
+          <div class="form-field"><div class="field-label">Critical Distance (bps)</div><input class="field-input" type="number" value="20"/><div class="field-helper">Trigger critical alert when within N bps</div></div>
+          <div class="form-field"><div class="field-label">Breach Confirmation Ticks</div><input class="field-input" type="number" value="1"/><div class="field-helper">Number of consecutive ticks above/below barrier to confirm breach</div></div>
+          <div class="form-field"><div class="field-label">Default Barrier Type</div><select class="field-select"><option>American (continuous)</option><option>European (expiry only)</option><option>Daily observation</option></select><div class="field-helper">Default for new position entries</div></div>
+          <div class="form-field"><div class="field-label">Rate Source Priority</div><select class="field-select"><option>LSEG RTDS (primary)</option><option>LSEG DataScope (primary)</option><option>Internal Composite</option></select><div class="field-helper">Primary rate source for barrier evaluation</div></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-hdr">Barrier Types — Supported</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Type</th><th>Code</th><th>Description</th><th>Auto Murex</th><th>Enabled</th></tr></thead>
+            <tbody>
+              <tr><td>Up-and-In (UII)</td><td class="td-mono">AM-UII</td><td>Activates when spot rises above barrier</td><td><span class="sp sp-green">Yes</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+              <tr><td>Up-and-Out (UIO)</td><td class="td-mono">AM-UIO</td><td>Expires (knocks out) when spot rises above barrier</td><td><span class="sp sp-green">Yes</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+              <tr><td>Down-and-In (DII)</td><td class="td-mono">AM-DII</td><td>Activates when spot falls below barrier</td><td><span class="sp sp-green">Yes</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+              <tr><td>Down-and-Out (DIO)</td><td class="td-mono">AM-DIO</td><td>Expires (knocks out) when spot falls below barrier</td><td><span class="sp sp-green">Yes</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+              <tr><td>European Vanilla</td><td class="td-mono">EU-VAN</td><td>Expiry-only observation</td><td><span class="sp sp-amber">On breach</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTS TAB -->
+    <div id="tab-alerts" class="tab-content">
+      <div class="form-section">
+        <div class="form-section-hdr">Alert Threshold Settings</div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">Near-Barrier Warning (% dist)</div><input class="field-input" type="number" value="0.5" step="0.1"/><div class="field-helper">Alert when spot within X% of barrier</div></div>
+          <div class="form-field"><div class="field-label">Near-Barrier Critical (% dist)</div><input class="field-input" type="number" value="0.2" step="0.1"/><div class="field-helper">Critical alert threshold</div></div>
+          <div class="form-field"><div class="field-label">Rate Spike Threshold (σ)</div><input class="field-input" type="number" value="2.0" step="0.1"/><div class="field-helper">Std deviations for rate spike detection</div></div>
+          <div class="form-field"><div class="field-label">Rate Spike Window (s)</div><input class="field-input" type="number" value="60"/><div class="field-helper">Rolling window for spike detection</div></div>
+          <div class="form-field"><div class="field-label">Feed Latency Warning (ms)</div><input class="field-input" type="number" value="500"/><div class="field-helper">Alert if any feed exceeds this latency</div></div>
+          <div class="form-field"><div class="field-label">Alert Cooldown (min)</div><input class="field-input" type="number" value="5"/><div class="field-helper">Minimum time between repeated alerts</div></div>
+          <div class="form-field"><div class="field-label">Murex ACK Timeout (s)</div><input class="field-input" type="number" value="30"/><div class="field-helper">Trigger alert if no ACK within N seconds</div></div>
+          <div class="form-field"><div class="field-label">Max Retry Attempts</div><input class="field-input" type="number" value="3"/><div class="field-helper">Murex event retries before escalation</div></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-hdr">Alert Toggles</div>
+        <div class="toggle-row"><div><div class="toggle-label">Breach Auto-Alert</div><div class="toggle-sub">Automatically alert on any barrier breach</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">Near-Barrier Warnings</div><div class="toggle-sub">Warn when within configured distance bands</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">Rate Spike Detection</div><div class="toggle-sub">Statistical anomaly detection on live rates</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">Murex ACK Monitoring</div><div class="toggle-sub">Alert if Murex does not ACK within timeout</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">Greeks Limit Alerts</div><div class="toggle-sub">Alert when Greeks approach or exceed limits</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">Expiry Reminder (T-1)</div><div class="toggle-sub">Alert 24 hours before option expiry</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+
+    <!-- FEED TAB -->
+    <div id="tab-feed" class="tab-content">
+      <div class="form-section">
+        <div class="form-section-hdr">LSEG Refinitiv RTDS</div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">Server Host</div><input class="field-input" value="rtds-prod-01.lseg.internal"/></div>
+          <div class="form-field"><div class="field-label">Port</div><input class="field-input" value="14002"/></div>
+          <div class="form-field"><div class="field-label">Service Name</div><input class="field-input" value="ELEKTRON_DD"/></div>
+          <div class="form-field"><div class="field-label">Application ID</div><input class="field-input" value="LCM_BARRIER_01"/></div>
+          <div class="form-field"><div class="field-label">Reconnect Interval (s)</div><input class="field-input" type="number" value="5"/></div>
+          <div class="form-field"><div class="field-label">Max Reconnect Attempts</div><input class="field-input" type="number" value="10"/></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-hdr">LSEG DataScope</div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">API Endpoint</div><input class="field-input" value="https://selectapi.datascope.refinitiv.com"/></div>
+          <div class="form-field"><div class="field-label">Refresh Interval (s)</div><input class="field-input" type="number" value="10"/></div>
+          <div class="form-field"><div class="field-label">Username</div><input class="field-input" value="lcm_app_user"/></div>
+          <div class="form-field"><div class="field-label">Token Expiry (hrs)</div><input class="field-input" type="number" value="24"/></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-hdr">Feed Priority &amp; Failover</div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">Primary Feed</div><select class="field-select"><option>LSEG RTDS</option><option>LSEG DataScope</option><option>Internal Composite</option></select></div>
+          <div class="form-field"><div class="field-label">Secondary Feed (Failover)</div><select class="field-select"><option>LSEG DataScope</option><option>LSEG RTDS</option><option>Internal Composite</option></select></div>
+          <div class="form-field"><div class="field-label">Failover Trigger (ms)</div><input class="field-input" type="number" value="10000"/><div class="field-helper">Auto-failover if primary silent for N ms</div></div>
+          <div class="form-field"><div class="field-label">Auto-Failover</div><div style="margin-top:6px"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MUREX TAB -->
+    <div id="tab-murex" class="tab-content">
+      <div class="form-section">
+        <div class="form-section-hdr">Murex Gateway Connection</div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">Gateway Host</div><input class="field-input" value="murex-gw-prod-01.internal"/></div>
+          <div class="form-field"><div class="field-label">Port</div><input class="field-input" value="9701"/></div>
+          <div class="form-field"><div class="field-label">Protocol</div><select class="field-select"><option>MxML / FIX 5.0</option><option>FIX 4.4</option><option>REST</option></select></div>
+          <div class="form-field"><div class="field-label">TLS Version</div><select class="field-select"><option>TLS 1.3</option><option>TLS 1.2</option></select></div>
+          <div class="form-field"><div class="field-label">ACK Timeout (s)</div><input class="field-input" type="number" value="30"/></div>
+          <div class="form-field"><div class="field-label">Max Queue Depth</div><input class="field-input" type="number" value="500"/></div>
+          <div class="form-field"><div class="field-label">Heartbeat Interval (s)</div><input class="field-input" type="number" value="30"/></div>
+          <div class="form-field"><div class="field-label">Auth Method</div><select class="field-select"><option>Certificate + Token</option><option>Token only</option><option>Certificate only</option></select></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS TAB -->
+    <div id="tab-notifications" class="tab-content">
+      <div class="form-section">
+        <div class="form-section-hdr">Email Notification Settings</div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">SMTP Host</div><input class="field-input" value="smtp.internal.corp"/></div>
+          <div class="form-field"><div class="field-label">Port</div><input class="field-input" value="587"/></div>
+          <div class="form-field"><div class="field-label">Breach Alert Recipients</div><input class="field-input" value="risk-desk@corp.com, fx-options@corp.com"/></div>
+          <div class="form-field"><div class="field-label">System Alert Recipients</div><input class="field-input" value="lcm-ops@corp.com"/></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-hdr">Notification Toggles</div>
+        <div class="toggle-row"><div><div class="toggle-label">Email on Breach</div><div class="toggle-sub">Send email when barrier is breached</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">SMS on Critical Alert</div><div class="toggle-sub">SMS escalation for critical-priority alerts</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">Dashboard Push</div><div class="toggle-sub">Real-time dashboard notification on alerts</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div><div class="toggle-label">Expiry Reminder Emails</div><div class="toggle-sub">Daily reminder for options expiring T-1</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+
+    <!-- SYSTEM TAB -->
+    <div id="tab-system" class="tab-content">
+      <div class="form-section">
+        <div class="form-section-hdr">System Information</div>
+        <div class="form-grid">
+          <div class="form-field"><div class="field-label">Application</div><div class="field-val">LCM — Life Cycle Management</div></div>
+          <div class="form-field"><div class="field-label">Version</div><div class="field-val">v2.4.1</div></div>
+          <div class="form-field"><div class="field-label">Environment</div><div class="field-val"><span class="sp sp-amber">UAT</span></div></div>
+          <div class="form-field"><div class="field-label">Build Date</div><div class="field-val">2024-05-20</div></div>
+          <div class="form-field"><div class="field-label">Timezone</div><select class="field-select"><option>Asia/Singapore (SGT)</option><option>UTC</option><option>Asia/Tokyo (JST)</option></select></div>
+          <div class="form-field"><div class="field-label">Date Format</div><select class="field-select"><option>YYYY-MM-DD</option><option>DD/MM/YYYY</option><option>MM/DD/YYYY</option></select></div>
+          <div class="form-field"><div class="field-label">Audit Log Retention</div><select class="field-select"><option>7 years</option><option>5 years</option><option>10 years</option></select></div>
+          <div class="form-field"><div class="field-label">Session Timeout (min)</div><input class="field-input" type="number" value="60"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <span>⚠ Unsaved changes will be lost. All configuration changes are logged to the Audit Trail.</span>
+      <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="alert('Configuration saved — changes logged to audit trail')">Save All Changes</button>
+      <button class="btn btn-outline btn-sm" onclick="alert('Changes discarded')">Discard</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot green"></div>Config Engine Online</div>
+    <div class="sb-item"><div class="sb-dot amber"></div>Unsaved Changes</div>
+    <div class="sb-item" style="margin-left:auto">Last Saved: 09:15:00 SGT</div>
+    <div class="sb-item">Env: UAT · v2.4.1</div>
+  </div>
+</div>
+
+<script>
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{const tabs=['barrier','alerts','feed','murex','notifications','system'];t.classList.toggle('active',tabs[i]===name)});
+  document.querySelectorAll('.tab-content').forEach(c=>{c.classList.toggle('active',c.id==='tab-'+name)});
+}
+function tick(){const n=new Date();document.getElementById('clk').textContent=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false})+' SGT';}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

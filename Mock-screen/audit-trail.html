@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Audit Trail</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;
+  --warn:#D97706;--ok:#16A34A;--breach:#DC2626;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted)}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.kpi-val{font-size:24px;font-weight:700;line-height:1.1;margin-top:4px;color:var(--text-main)}
+.kpi-val.blue{color:#2563EB}.kpi-val.green{color:#16A34A}.kpi-val.amber{color:#D97706}.kpi-val.red{color:#DC2626}
+.kpi-trend{font-size:10px;color:var(--text-muted);margin-top:4px}
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.panel-hdr{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.panel-hdr h3{font-size:13px;font-weight:700;color:var(--text-main)}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ph-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ph-badge.blue{background:rgba(37,99,235,.15);color:#2563EB}
+.ph-badge.amber{background:rgba(217,119,6,.15);color:#D97706}
+.filter-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.filter-bar input,.filter-bar select{padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:var(--bg-main);color:var(--text-main);font-size:12px}
+.filter-bar input[type="date"]{width:140px}
+.filter-bar input[type="text"]{width:200px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--row-hover)}
+tbody td{font-size:11.5px;padding:8px 12px;color:var(--text-main);white-space:nowrap}
+.td-mono{font-family:'Consolas','Courier New',monospace;font-size:11px;color:var(--text-muted)}
+.sp{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.sp-green{background:rgba(22,163,74,.15);color:#16A34A}
+.sp-amber{background:rgba(217,119,6,.15);color:#D97706}
+.sp-red{background:rgba(220,38,38,.15);color:#DC2626}
+.sp-blue{background:rgba(37,99,235,.15);color:#2563EB}
+.sp-purple{background:rgba(124,58,237,.15);color:#7C3AED}
+.sp-gray{background:rgba(100,116,139,.15);color:#64748B}
+/* ROW COLORS */
+.row-breach{background:rgba(220,38,38,.04)!important}
+.row-system{background:rgba(37,99,235,.02)!important}
+/* ACTION BADGE */
+.action-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.ab-breach{background:rgba(220,38,38,.15);color:#DC2626}
+.ab-murex{background:rgba(124,58,237,.15);color:#7C3AED}
+.ab-config{background:rgba(37,99,235,.15);color:#2563EB}
+.ab-trade{background:rgba(22,163,74,.15);color:#16A34A}
+.ab-limit{background:rgba(217,119,6,.15);color:#D97706}
+.ab-alert{background:rgba(217,119,6,.15);color:#D97706}
+.ab-auth{background:rgba(100,116,139,.15);color:#64748B}
+.ab-system{background:rgba(37,99,235,.12);color:#2563EB}
+/* PAGINATION */
+.pagination{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)}
+.page-btn{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-main);font-size:11px;cursor:pointer}
+.page-btn:hover{background:var(--row-hover)}
+.page-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item" onclick="location.href='alert-manager.html'"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item" onclick="location.href='event-stream.html'"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item" onclick="location.href='position-book.html'"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item" onclick="location.href='greeks-monitor.html'"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item" onclick="location.href='murex-gateway.html'"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item active"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item" onclick="location.href='connectivity.html'"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item" onclick="location.href='configuration.html'"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Audit Trail</div>
+      <div class="tb-sub">Full timestamped activity log · Immutable record</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <button class="btn btn-outline btn-sm">Export CSV</button>
+      <button class="btn btn-outline btn-sm">Export PDF</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Events Today</div><div class="kpi-val blue">1,247</div><div class="kpi-trend">All action types</div></div>
+      <div class="kpi-card"><div class="kpi-label">User Actions</div><div class="kpi-val">42</div><div class="kpi-trend">By 3 traders/admins</div></div>
+      <div class="kpi-card"><div class="kpi-label">System Events</div><div class="kpi-val">1,205</div><div class="kpi-trend">Automated only</div></div>
+      <div class="kpi-card"><div class="kpi-label">Barrier Breaches</div><div class="kpi-val red">3</div><div class="kpi-trend">Logged &amp; dispatched</div></div>
+      <div class="kpi-card"><div class="kpi-label">Config Changes</div><div class="kpi-val amber">5</div><div class="kpi-trend">Requires approval</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <h3>Audit Log</h3>
+        <div class="ph-right">
+          <span class="ph-badge blue">1,247 Records</span>
+          <button class="btn btn-outline btn-sm">↓ Export</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="date" value="2024-05-24"/>
+        <span style="font-size:12px;color:var(--text-muted)">to</span>
+        <input type="date" value="2024-05-24"/>
+        <input type="text" placeholder="Search audit ID, user, trade…"/>
+        <select>
+          <option>All Action Types</option>
+          <option>Barrier Breach</option>
+          <option>Murex Event</option>
+          <option>Trade Booking</option>
+          <option>Limit Change</option>
+          <option>Alert ACK</option>
+          <option>Config Change</option>
+          <option>Login / Logout</option>
+          <option>System</option>
+        </select>
+        <select>
+          <option>All Users</option>
+          <option>T.Chen (Trader)</option>
+          <option>R.Kumar (Trader)</option>
+          <option>S.Wong (Trader)</option>
+          <option>M.Lim (Admin)</option>
+          <option>SYSTEM</option>
+        </select>
+        <button class="btn btn-primary btn-sm">Apply</button>
+        <button class="btn btn-outline btn-sm">Clear</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Audit ID</th><th>Timestamp (SGT)</th><th>User</th><th>Role</th><th>Action</th><th>Object Type</th><th>Object ID</th><th>Description</th><th>IP Address</th><th>Result</th>
+          </tr></thead>
+          <tbody>
+            <tr class="row-breach"><td class="td-mono">AUD-20240524-1247</td><td class="td-mono">09:42:17.341</td><td>SYSTEM</td><td><span class="sp sp-gray">AUTO</span></td><td><span class="action-badge ab-breach">BARRIER BREACH</span></td><td>Trade</td><td class="td-mono">TXN-20240524-001</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">USD/SGD UIO: spot 1.3524 ≥ barrier 1.3500 — KO event triggered</td><td class="td-mono">—</td><td><span class="sp sp-green">OK</span></td></tr>
+            <tr class="row-breach"><td class="td-mono">AUD-20240524-1246</td><td class="td-mono">09:42:17.399</td><td>SYSTEM</td><td><span class="sp sp-gray">AUTO</span></td><td><span class="action-badge ab-murex">MUREX DISPATCH</span></td><td>Murex Event</td><td class="td-mono">MX-20240524-0042</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">Knock-Out event dispatched to Murex gateway for TXN-001</td><td class="td-mono">—</td><td><span class="sp sp-green">ACK'd</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1245</td><td class="td-mono">09:41:55.014</td><td>T.Chen</td><td><span class="sp sp-blue">TRADER</span></td><td><span class="action-badge ab-alert">ALERT ACK</span></td><td>Alert</td><td class="td-mono">ALR-001-08:55</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">Acknowledged near-barrier alert for EUR/USD DIO</td><td class="td-mono">10.20.1.45</td><td><span class="sp sp-green">OK</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1244</td><td class="td-mono">09:40:22.881</td><td>SYSTEM</td><td><span class="sp sp-gray">AUTO</span></td><td><span class="action-badge ab-alert">ALERT TRIGGER</span></td><td>Alert Rule</td><td class="td-mono">ALR-003</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">GBP/USD rate spike 3.1σ — threshold 2.0σ breached</td><td class="td-mono">—</td><td><span class="sp sp-green">Sent</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1230</td><td class="td-mono">09:35:12.004</td><td>M.Lim</td><td><span class="sp sp-red">ADMIN</span></td><td><span class="action-badge ab-limit">LIMIT CHANGE</span></td><td>Risk Limit</td><td class="td-mono">LMT-DELTA-USD</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">Net Delta USD limit updated: USD 45M → USD 50M</td><td class="td-mono">10.20.1.12</td><td><span class="sp sp-green">Approved</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1221</td><td class="td-mono">09:28:44.201</td><td>R.Kumar</td><td><span class="sp sp-blue">TRADER</span></td><td><span class="action-badge ab-trade">TRADE BOOKED</span></td><td>Trade</td><td class="td-mono">TXN-20240524-002</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">New EUR/USD DII option booked — EUR 30M notional</td><td class="td-mono">10.20.1.67</td><td><span class="sp sp-green">Booked</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1210</td><td class="td-mono">09:22:33.119</td><td>SYSTEM</td><td><span class="sp sp-gray">AUTO</span></td><td><span class="action-badge ab-breach">BARRIER BREACH</span></td><td>Trade</td><td class="td-mono">FXO-2024-203</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">EUR/SGD DIO: spot 1.4201 ≤ barrier 1.4200 — KI event triggered</td><td class="td-mono">—</td><td><span class="sp sp-green">OK</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1209</td><td class="td-mono">09:22:33.176</td><td>SYSTEM</td><td><span class="sp sp-gray">AUTO</span></td><td><span class="action-badge ab-murex">MUREX DISPATCH</span></td><td>Murex Event</td><td class="td-mono">MX-20240524-0038</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">Knock-In event dispatched — EUR/SGD FXO-2024-203</td><td class="td-mono">—</td><td><span class="sp sp-green">ACK'd</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1188</td><td class="td-mono">09:15:22.447</td><td>M.Lim</td><td><span class="sp sp-red">ADMIN</span></td><td><span class="action-badge ab-config">CONFIG CHANGE</span></td><td>Alert Rule</td><td class="td-mono">ALR-007</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">Alert rule ALR-007 (Unusual Vega) paused — manual override</td><td class="td-mono">10.20.1.12</td><td><span class="sp sp-amber">Paused</span></td></tr>
+            <tr><td class="td-mono">AUD-20240524-1177</td><td class="td-mono">09:10:04.331</td><td>S.Wong</td><td><span class="sp sp-blue">TRADER</span></td><td><span class="action-badge ab-trade">TRADE AMENDED</span></td><td>Trade</td><td class="td-mono">FXO-2024-244</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">USD/SGD UIO notional amended: USD 70M → USD 75M</td><td class="td-mono">10.20.1.88</td><td><span class="sp sp-green">OK</span></td></tr>
+            <tr class="row-system"><td class="td-mono">AUD-20240524-1001</td><td class="td-mono">08:00:00.001</td><td>SYSTEM</td><td><span class="sp sp-gray">AUTO</span></td><td><span class="action-badge ab-system">SYSTEM START</span></td><td>System</td><td class="td-mono">LCM-v2.4.1</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">LCM platform started — all services online, Murex gateway connected</td><td class="td-mono">—</td><td><span class="sp sp-green">OK</span></td></tr>
+            <tr class="row-system"><td class="td-mono">AUD-20240524-1000</td><td class="td-mono">08:00:00.000</td><td>T.Chen</td><td><span class="sp sp-blue">TRADER</span></td><td><span class="action-badge ab-auth">LOGIN</span></td><td>Auth</td><td class="td-mono">USR-TCHEN</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">User T.Chen logged in — session started</td><td class="td-mono">10.20.1.45</td><td><span class="sp sp-green">OK</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span>Showing 1–12 of 1,247 records</span>
+        <div style="display:flex;gap:4px;margin-left:auto">
+          <button class="page-btn">‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <span style="color:var(--text-muted)">…</span>
+          <button class="page-btn">104</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot green"></div>Audit Log: LIVE</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Immutable Record</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Retention: 7 years</div>
+    <div class="sb-item" style="margin-left:auto">1,247 events today · Storage: 2.4MB</div>
+  </div>
+</div>
+
+<script>
+function tick(){const n=new Date();const s=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});document.getElementById('clk').textContent=s+' SGT';}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

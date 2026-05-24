@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Connectivity</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;
+  --warn:#D97706;--ok:#16A34A;--breach:#DC2626;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted)}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.kpi-val{font-size:24px;font-weight:700;line-height:1.1;margin-top:4px;color:var(--text-main)}
+.kpi-val.green{color:#16A34A}.kpi-val.amber{color:#D97706}.kpi-val.blue{color:#2563EB}.kpi-val.red{color:#DC2626}
+.kpi-trend{font-size:10px;color:var(--text-muted);margin-top:4px}
+/* FEED CARDS */
+.feed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.feed-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.fc-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.fc-indicator{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.fc-indicator.green{background:#16A34A;box-shadow:0 0 8px rgba(22,163,74,.5)}
+.fc-indicator.amber{background:#D97706;box-shadow:0 0 8px rgba(217,119,6,.5)}
+.fc-indicator.red{background:#DC2626;box-shadow:0 0 8px rgba(220,38,38,.5)}
+.fc-name{font-size:13px;font-weight:700;color:var(--text-main)}
+.fc-host{font-size:10px;color:var(--text-muted);margin-top:1px;font-family:monospace}
+.fc-status{margin-left:auto;font-size:11px;font-weight:700}
+.fc-status.green{color:#16A34A}.fc-status.amber{color:#D97706}.fc-status.red{color:#DC2626}
+.fc-body{padding:0}
+.fc-row{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--border);font-size:12px}
+.fc-row:last-child{border-bottom:none}
+.fc-row-label{color:var(--text-muted)}
+.fc-row-val{font-weight:600;color:var(--text-main)}
+.fc-row-val.green{color:#16A34A}
+.fc-row-val.amber{color:#D97706}
+.fc-row-val.red{color:#DC2626}
+/* LATENCY CHART */
+.lat-chart{display:flex;align-items:flex-end;gap:3px;padding:10px 16px 6px;height:60px}
+.lat-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;transition:height .3s}
+/* CONN LOG */
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.panel-hdr{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px}
+.panel-hdr h3{font-size:13px;font-weight:700;color:var(--text-main)}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ph-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ph-badge.green{background:rgba(22,163,74,.15);color:#16A34A}
+.ph-badge.blue{background:rgba(37,99,235,.15);color:#2563EB}
+.ph-badge.amber{background:rgba(217,119,6,.15);color:#D97706}
+.log-entry{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:11.5px}
+.log-entry:last-child{border-bottom:none}
+.log-ts{font-family:'Consolas','Courier New',monospace;font-size:10.5px;color:var(--text-muted);white-space:nowrap;width:72px;flex-shrink:0}
+.log-icon{font-size:12px;flex-shrink:0}
+.log-body{flex:1}
+.log-title{font-weight:600;color:var(--text-main)}
+.log-detail{font-size:10.5px;color:var(--text-muted);font-family:'Consolas','Courier New',monospace;margin-top:2px}
+.log-entry.ok{border-left:3px solid #16A34A}
+.log-entry.warn{border-left:3px solid #D97706}
+.log-entry.err{border-left:3px solid #DC2626}
+.log-entry.info{border-left:3px solid #2563EB}
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+.sb-dot.amber{background:#D97706}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulsing{animation:pulse 1.4s infinite}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item" onclick="location.href='alert-manager.html'"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item" onclick="location.href='event-stream.html'"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item" onclick="location.href='position-book.html'"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item" onclick="location.href='greeks-monitor.html'"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item" onclick="location.href='murex-gateway.html'"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item" onclick="location.href='audit-trail.html'"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item active"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item" onclick="location.href='configuration.html'"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Connectivity</div>
+      <div class="tb-sub">Feed status · Latency metrics · Connection log</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <span style="font-size:11px;font-weight:600;color:#16A34A" class="pulsing">● 4/4 Online</span>
+      <button class="btn btn-outline btn-sm" onclick="alert('Running connectivity test…')">Test All</button>
+      <button class="btn btn-outline btn-sm">Export</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Connections Online</div><div class="kpi-val green">4 / 4</div><div class="kpi-trend">All feeds healthy</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg Latency</div><div class="kpi-val green">0.2ms</div><div class="kpi-trend">Across all feeds</div></div>
+      <div class="kpi-card"><div class="kpi-label">Uptime (Today)</div><div class="kpi-val green">99.97%</div><div class="kpi-trend">9h 42m uptime</div></div>
+      <div class="kpi-card"><div class="kpi-label">Reconnects Today</div><div class="kpi-val amber">1</div><div class="kpi-trend">DataScope 09:12</div></div>
+    </div>
+
+    <!-- Feed Status Cards -->
+    <div class="feed-grid">
+      <!-- LSEG RTDS -->
+      <div class="feed-card">
+        <div class="fc-header">
+          <div class="fc-indicator green pulsing"></div>
+          <div>
+            <div class="fc-name">LSEG Refinitiv RTDS</div>
+            <div class="fc-host">rtds-prod-01.lseg.internal:14002</div>
+          </div>
+          <div class="fc-status green">ONLINE</div>
+        </div>
+        <div class="lat-chart" id="rtds-chart"></div>
+        <div class="fc-body">
+          <div class="fc-row"><div class="fc-row-label">Status</div><div class="fc-row-val green">Connected — ESTABLISHED</div></div>
+          <div class="fc-row"><div class="fc-row-label">Latency (current)</div><div class="fc-row-val green" id="rtds-lat">0.18ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Avg Latency (today)</div><div class="fc-row-val green">0.21ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Peak Latency</div><div class="fc-row-val amber">1.2ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Uptime (today)</div><div class="fc-row-val green">100%</div></div>
+          <div class="fc-row"><div class="fc-row-label">Ticks Received</div><div class="fc-row-val">612,847</div></div>
+          <div class="fc-row"><div class="fc-row-label">Pairs Subscribed</div><div class="fc-row-val">20</div></div>
+          <div class="fc-row"><div class="fc-row-label">Last Tick</div><div class="fc-row-val" id="rtds-tick">09:42:17</div></div>
+          <div class="fc-row"><div class="fc-row-label">Reconnects</div><div class="fc-row-val green">0</div></div>
+          <div class="fc-row"><div class="fc-row-label">Role</div><div class="fc-row-val" style="color:#2563EB">Primary Feed</div></div>
+        </div>
+      </div>
+
+      <!-- LSEG DataScope -->
+      <div class="feed-card">
+        <div class="fc-header">
+          <div class="fc-indicator amber pulsing"></div>
+          <div>
+            <div class="fc-name">LSEG DataScope</div>
+            <div class="fc-host">selectapi.datascope.refinitiv.com</div>
+          </div>
+          <div class="fc-status amber">DEGRADED</div>
+        </div>
+        <div class="lat-chart" id="dscope-chart"></div>
+        <div class="fc-body">
+          <div class="fc-row"><div class="fc-row-label">Status</div><div class="fc-row-val amber">Connected — High Latency</div></div>
+          <div class="fc-row"><div class="fc-row-label">Latency (current)</div><div class="fc-row-val amber">520ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Avg Latency (today)</div><div class="fc-row-val green">12ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Peak Latency</div><div class="fc-row-val amber">520ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Uptime (today)</div><div class="fc-row-val amber">99.8%</div></div>
+          <div class="fc-row"><div class="fc-row-label">Requests Today</div><div class="fc-row-val">3,481</div></div>
+          <div class="fc-row"><div class="fc-row-label">Pairs Covered</div><div class="fc-row-val">20</div></div>
+          <div class="fc-row"><div class="fc-row-label">Last Response</div><div class="fc-row-val" id="ds-tick">09:42:11</div></div>
+          <div class="fc-row"><div class="fc-row-label">Reconnects</div><div class="fc-row-val amber">1</div></div>
+          <div class="fc-row"><div class="fc-row-label">Role</div><div class="fc-row-val">Secondary Feed</div></div>
+        </div>
+      </div>
+
+      <!-- Internal Composite -->
+      <div class="feed-card">
+        <div class="fc-header">
+          <div class="fc-indicator green pulsing"></div>
+          <div>
+            <div class="fc-name">Internal Composite</div>
+            <div class="fc-host">feed-composite-01.internal:9200</div>
+          </div>
+          <div class="fc-status green">ONLINE</div>
+        </div>
+        <div class="lat-chart" id="int-chart"></div>
+        <div class="fc-body">
+          <div class="fc-row"><div class="fc-row-label">Status</div><div class="fc-row-val green">Connected — ESTABLISHED</div></div>
+          <div class="fc-row"><div class="fc-row-label">Latency (current)</div><div class="fc-row-val green">0.08ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Avg Latency (today)</div><div class="fc-row-val green">0.09ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Peak Latency</div><div class="fc-row-val green">0.4ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Uptime (today)</div><div class="fc-row-val green">100%</div></div>
+          <div class="fc-row"><div class="fc-row-label">Ticks Today</div><div class="fc-row-val">155,023</div></div>
+          <div class="fc-row"><div class="fc-row-label">Pairs Covered</div><div class="fc-row-val">8</div></div>
+          <div class="fc-row"><div class="fc-row-label">Last Tick</div><div class="fc-row-val" id="int-tick">09:42:17</div></div>
+          <div class="fc-row"><div class="fc-row-label">Reconnects</div><div class="fc-row-val green">0</div></div>
+          <div class="fc-row"><div class="fc-row-label">Role</div><div class="fc-row-val">Tertiary / Fallback</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Murex + Connection Log -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <!-- Murex Gateway -->
+      <div class="feed-card">
+        <div class="fc-header">
+          <div class="fc-indicator green pulsing"></div>
+          <div>
+            <div class="fc-name">Murex Gateway</div>
+            <div class="fc-host">murex-gw-prod-01.internal:9701</div>
+          </div>
+          <div class="fc-status green">ONLINE</div>
+        </div>
+        <div class="fc-body">
+          <div class="fc-row"><div class="fc-row-label">Status</div><div class="fc-row-val green">Connected — TLS 1.3</div></div>
+          <div class="fc-row"><div class="fc-row-label">Round-Trip Latency</div><div class="fc-row-val green">6ms</div></div>
+          <div class="fc-row"><div class="fc-row-label">Protocol</div><div class="fc-row-val">MxML / FIX 5.0</div></div>
+          <div class="fc-row"><div class="fc-row-label">Events Sent (today)</div><div class="fc-row-val" style="color:#7C3AED">12</div></div>
+          <div class="fc-row"><div class="fc-row-label">Queue Depth</div><div class="fc-row-val amber">2</div></div>
+          <div class="fc-row"><div class="fc-row-label">Uptime (today)</div><div class="fc-row-val green">100%</div></div>
+          <div class="fc-row"><div class="fc-row-label">Last Heartbeat</div><div class="fc-row-val" id="mx-hb">09:42:17</div></div>
+        </div>
+      </div>
+
+      <!-- Connection Log -->
+      <div class="panel" style="margin-bottom:0">
+        <div class="panel-hdr">
+          <h3>Connection Log</h3>
+          <div class="ph-right"><span class="ph-badge blue">Today</span></div>
+        </div>
+        <div style="max-height:290px;overflow-y:auto">
+          <div class="log-entry ok"><div class="log-ts">09:42:17</div><div class="log-icon">✅</div><div class="log-body"><div class="log-title">Murex Gateway heartbeat OK</div><div class="log-detail">host=murex-gw-prod-01  latency=6ms</div></div></div>
+          <div class="log-entry warn"><div class="log-ts">09:38:55</div><div class="log-icon">⚠️</div><div class="log-body"><div class="log-title">LSEG DataScope latency spike</div><div class="log-detail">latency=520ms  normal=12ms  alert_raised=true</div></div></div>
+          <div class="log-entry ok"><div class="log-ts">09:35:00</div><div class="log-icon">🔄</div><div class="log-body"><div class="log-title">LSEG RTDS subscription refreshed</div><div class="log-detail">pairs=20  service=ELEKTRON_DD  latency=0.18ms</div></div></div>
+          <div class="log-entry ok"><div class="log-ts">09:22:00</div><div class="log-icon">✅</div><div class="log-body"><div class="log-title">Internal Composite heartbeat OK</div><div class="log-detail">host=feed-composite-01  latency=0.08ms</div></div></div>
+          <div class="log-entry err"><div class="log-ts">09:12:33</div><div class="log-icon">❌</div><div class="log-body"><div class="log-title">LSEG DataScope disconnected</div><div class="log-detail">error=timeout  reconnect_attempt=1  result=success  downtime=8s</div></div></div>
+          <div class="log-entry ok"><div class="log-ts">09:12:41</div><div class="log-icon">✅</div><div class="log-body"><div class="log-title">LSEG DataScope reconnected</div><div class="log-detail">reconnect_count=1  downtime=8s  latency=14ms</div></div></div>
+          <div class="log-entry info"><div class="log-ts">08:30:00</div><div class="log-icon">🔌</div><div class="log-body"><div class="log-title">Murex Gateway TLS handshake complete</div><div class="log-detail">tls=1.3  cert_valid=true  auth=cert+token</div></div></div>
+          <div class="log-entry ok"><div class="log-ts">08:00:01</div><div class="log-icon">✅</div><div class="log-body"><div class="log-title">All feeds connected — system startup complete</div><div class="log-detail">rtds=OK  datascope=OK  composite=OK  murex=OK</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot green pulsing"></div>LSEG RTDS: Online</div>
+    <div class="sb-item"><div class="sb-dot amber"></div>DataScope: Degraded</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Composite: Online</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Murex: Online</div>
+    <div class="sb-item" style="margin-left:auto">Avg Latency: 0.2ms · <span id="lr"></span></div>
+  </div>
+</div>
+
+<script>
+// Render latency mini-charts
+function renderChart(id, vals, color){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=vals.map(h=>`<div class="lat-bar" style="height:${h}%;background:${color};flex:1"></div>`).join('');
+}
+renderChart('rtds-chart',[40,55,48,62,50,45,58,52,47,60,55,48,52,50,45,55,60,48,52,55],'#16A34A');
+renderChart('dscope-chart',[20,30,25,80,100,40,30,25,30,28,25,30,28,100,35,25,30,28,25,30],'#D97706');
+renderChart('int-chart',[30,35,28,32,35,30,28,32,30,35,28,32,35,30,28,32,30,35,28,32],'#2563EB');
+
+function tick(){
+  const n=new Date();
+  const s=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});
+  document.getElementById('clk').textContent=s+' SGT';
+  document.getElementById('lr').textContent=s+' SGT';
+  document.getElementById('rtds-tick').textContent=s;
+  document.getElementById('int-tick').textContent=s;
+  document.getElementById('mx-hb').textContent=s;
+  // Tick latency
+  const l=(0.14+Math.random()*0.12).toFixed(2);
+  document.getElementById('rtds-lat').textContent=l+'ms';
+}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

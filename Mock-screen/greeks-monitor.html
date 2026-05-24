@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Greeks Monitor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;
+  --warn:#D97706;--ok:#16A34A;--breach:#DC2626;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted)}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:16px}
+/* KPI GREEKS */
+.greeks-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.gk-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px}
+.gk-symbol{font-size:28px;font-weight:800;margin-bottom:4px}
+.gk-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)}
+.gk-value{font-size:22px;font-weight:700;margin-top:6px;line-height:1.1}
+.gk-value.red{color:#DC2626}.gk-value.amber{color:#D97706}.gk-value.green{color:#16A34A}
+.gk-sub{font-size:11px;color:var(--text-muted);margin-top:4px}
+.gk-limit{font-size:10px;margin-top:6px;padding:3px 8px;border-radius:4px;display:inline-block;font-weight:600}
+.limit-ok{background:rgba(22,163,74,.12);color:#16A34A}
+.limit-warn{background:rgba(217,119,6,.12);color:#D97706}
+.limit-breach{background:rgba(220,38,38,.12);color:#DC2626}
+/* CCY GREEKS TABLE */
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.panel-hdr{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px}
+.panel-hdr h3{font-size:13px;font-weight:700;color:var(--text-main)}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ph-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ph-badge.amber{background:rgba(217,119,6,.15);color:#D97706}
+.ph-badge.blue{background:rgba(37,99,235,.15);color:#2563EB}
+.ph-badge.red{background:rgba(220,38,38,.15);color:#DC2626}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+thead th:first-child{text-align:left}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--row-hover)}
+tbody td{font-size:12px;padding:9px 12px;color:var(--text-main);white-space:nowrap;text-align:right}
+tbody td:first-child{text-align:left;font-weight:700}
+.pos{color:#16A34A;font-weight:600}
+.neg{color:#DC2626;font-weight:600}
+.warn-cell{color:#D97706;font-weight:600}
+.row-breach{background:rgba(220,38,38,.06)!important}
+.row-warn{background:rgba(217,119,6,.04)!important}
+/* HEATMAP */
+.heatmap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:14px}
+.hm-cell{padding:12px 10px;border-radius:6px;text-align:center;cursor:pointer;transition:opacity .15s}
+.hm-cell:hover{opacity:.85}
+.hm-pair{font-size:11px;font-weight:700;color:#fff;margin-bottom:4px}
+.hm-val{font-size:13px;font-weight:700;color:#fff}
+.hm-label{font-size:9px;color:rgba(255,255,255,.7);margin-top:2px}
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+.sb-dot.amber{background:#D97706}
+.sb-dot.red{background:#DC2626}
+.layout-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item" onclick="location.href='alert-manager.html'"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item" onclick="location.href='event-stream.html'"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item" onclick="location.href='position-book.html'"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item active"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item" onclick="location.href='murex-gateway.html'"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item" onclick="location.href='audit-trail.html'"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item" onclick="location.href='connectivity.html'"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item" onclick="location.href='configuration.html'"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Greeks Monitor</div>
+      <div class="tb-sub">Delta · Gamma · Vega · Theta — per position &amp; net</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <button class="btn btn-outline btn-sm">Recalculate</button>
+      <button class="btn btn-outline btn-sm">Export</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Net Greeks KPI -->
+    <div class="greeks-kpi">
+      <div class="gk-card">
+        <div class="gk-symbol" style="color:#D97706">Δ</div>
+        <div class="gk-name">Net Delta</div>
+        <div class="gk-value amber">+USD 52.3M</div>
+        <div class="gk-sub">vs USD 48.1M yesterday</div>
+        <span class="gk-limit limit-breach">⚠ Limit 50M — EXCEEDED</span>
+      </div>
+      <div class="gk-card">
+        <div class="gk-symbol" style="color:#16A34A">Γ</div>
+        <div class="gk-name">Net Gamma</div>
+        <div class="gk-value green">+USD 1.82M</div>
+        <div class="gk-sub">vs USD 1.94M yesterday</div>
+        <span class="gk-limit limit-ok">✓ Limit 5M — 36%</span>
+      </div>
+      <div class="gk-card">
+        <div class="gk-symbol" style="color:#2563EB">ν</div>
+        <div class="gk-name">Net Vega</div>
+        <div class="gk-value" style="color:#2563EB">+USD 8.4M</div>
+        <div class="gk-sub">vs USD 7.9M yesterday</div>
+        <span class="gk-limit limit-warn">⚠ Limit 15M — 85%</span>
+      </div>
+      <div class="gk-card">
+        <div class="gk-symbol" style="color:#7C3AED">Θ</div>
+        <div class="gk-name">Net Theta</div>
+        <div class="gk-value" style="color:#7C3AED">-USD 124K/day</div>
+        <div class="gk-sub">Time decay cost</div>
+        <span class="gk-limit limit-ok">✓ Limit -500K — 25%</span>
+      </div>
+    </div>
+
+    <!-- Greeks by CCY Pair -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <h3>Greeks by Currency Pair</h3>
+        <div class="ph-right"><span class="ph-badge blue">47 Positions</span><span class="ph-badge red">1 Limit Breach</span></div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th style="text-align:left">CCY Pair</th><th>Positions</th><th>Net Notional</th><th>Net Delta (Δ)</th><th>Net Gamma (Γ)</th><th>Net Vega (ν)</th><th>Net Theta (Θ)</th><th>Δ Limit</th><th>Δ Util%</th>
+          </tr></thead>
+          <tbody>
+            <tr class="row-breach">
+              <td>USD/SGD</td><td>8</td><td>+USD 320M</td>
+              <td class="warn-cell">+USD 28.4M</td><td class="pos">+USD 0.84M</td><td class="pos">+USD 3.2M</td><td class="neg">-USD 48K</td>
+              <td>USD 25M</td><td class="warn-cell">113%</td>
+            </tr>
+            <tr>
+              <td>USD/JPY</td><td>7</td><td>+USD 430M</td>
+              <td class="pos">+USD 14.1M</td><td class="pos">+USD 0.62M</td><td class="pos">+USD 2.8M</td><td class="neg">-USD 32K</td>
+              <td>USD 20M</td><td class="pos">71%</td>
+            </tr>
+            <tr>
+              <td>EUR/USD</td><td>6</td><td>-USD 180M</td>
+              <td class="neg">-USD 8.2M</td><td class="neg">-USD 0.31M</td><td class="neg">-USD 1.4M</td><td class="pos">+USD 18K</td>
+              <td>EUR 30M</td><td class="pos">37%</td>
+            </tr>
+            <tr>
+              <td>GBP/USD</td><td>5</td><td>+USD 95M</td>
+              <td class="pos">+USD 7.2M</td><td class="pos">+USD 0.18M</td><td class="pos">+USD 1.1M</td><td class="neg">-USD 12K</td>
+              <td>GBP 20M</td><td class="pos">62%</td>
+            </tr>
+            <tr>
+              <td>EUR/SGD</td><td>5</td><td>+USD 150M</td>
+              <td class="pos">+USD 5.9M</td><td class="pos">+USD 0.21M</td><td class="pos">+USD 0.9M</td><td class="neg">-USD 8K</td>
+              <td>EUR 20M</td><td class="pos">44%</td>
+            </tr>
+            <tr>
+              <td>USD/HKD</td><td>4</td><td>-USD 120M</td>
+              <td class="neg">-USD 4.8M</td><td class="neg">-USD 0.12M</td><td class="neg">-USD 0.7M</td><td class="pos">+USD 7K</td>
+              <td>USD 15M</td><td class="pos">32%</td>
+            </tr>
+            <tr>
+              <td>AUD/USD</td><td>4</td><td>-USD 60M</td>
+              <td class="neg">-USD 3.1M</td><td class="neg">-USD 0.09M</td><td class="neg">-USD 0.5M</td><td class="pos">+USD 5K</td>
+              <td>AUD 20M</td><td class="pos">28%</td>
+            </tr>
+            <tr>
+              <td>USD/CNH</td><td>4</td><td>+USD 100M</td>
+              <td class="pos">+USD 4.2M</td><td class="pos">+USD 0.14M</td><td class="pos">+USD 0.8M</td><td class="neg">-USD 6K</td>
+              <td>USD 15M</td><td class="pos">28%</td>
+            </tr>
+            <tr style="background:rgba(37,99,235,.05);font-weight:700">
+              <td>NET TOTAL</td><td>47</td><td>+USD 735M</td>
+              <td class="warn-cell">+USD 52.3M</td><td class="pos">+USD 1.82M</td><td class="pos">+USD 8.4M</td><td class="neg">-USD 124K</td>
+              <td>—</td><td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Greeks per position + heatmap -->
+    <div class="layout-2">
+      <div class="panel">
+        <div class="panel-hdr"><h3>Position-Level Greeks (Top 10 by |Delta|)</h3></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="text-align:left">Trade ID</th><th>Pair</th><th>Delta Δ</th><th>Gamma Γ</th><th>Vega ν</th><th>Theta Θ</th><th>Status</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-231</td><td>USD/HKD</td><td class="neg">-0.22</td><td class="neg">-0.06</td><td class="neg">-89K</td><td class="pos">+6.2K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(22,163,74,.15);color:#16A34A;padding:2px 7px;border-radius:8px">Active</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-244</td><td>USD/SGD</td><td class="pos">+0.71</td><td class="pos">+0.14</td><td class="pos">+95K</td><td class="neg">-8.1K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(22,163,74,.15);color:#16A34A;padding:2px 7px;border-radius:8px">Active</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-112</td><td>USD/JPY</td><td class="pos">+0.62</td><td class="pos">+0.15</td><td class="pos">+148K</td><td class="neg">-7.8K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(217,119,6,.15);color:#D97706;padding:2px 7px;border-radius:8px">Near KI</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-067</td><td>USD/SGD</td><td class="pos">+0.82</td><td class="pos">+0.04</td><td class="pos">+4K</td><td class="neg">-12.4K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(217,119,6,.15);color:#D97706;padding:2px 7px;border-radius:8px">Expiry T-1</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-203</td><td>EUR/SGD</td><td class="pos">+0.55</td><td class="pos">+0.11</td><td class="pos">+92K</td><td class="neg">-4.9K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(22,163,74,.15);color:#16A34A;padding:2px 7px;border-radius:8px">Active</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">TXN-20240524-001</td><td>USD/SGD</td><td class="pos">+0.48</td><td class="pos">+0.12</td><td class="pos">+82K</td><td class="neg">-4.2K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(220,38,38,.15);color:#DC2626;padding:2px 7px;border-radius:8px">KO'd</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-145</td><td>GBP/USD</td><td class="pos">+0.41</td><td class="pos">+0.09</td><td class="pos">+72K</td><td class="neg">-3.6K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(22,163,74,.15);color:#16A34A;padding:2px 7px;border-radius:8px">Active</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-218</td><td>USD/CNH</td><td class="pos">+0.38</td><td class="pos">+0.10</td><td class="pos">+108K</td><td class="neg">-5.7K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(22,163,74,.15);color:#16A34A;padding:2px 7px;border-radius:8px">Active</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-089</td><td>EUR/USD</td><td class="neg">-0.36</td><td class="neg">-0.08</td><td class="neg">-61K</td><td class="pos">+3.1K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(217,119,6,.15);color:#D97706;padding:2px 7px;border-radius:8px">Near KO</span></td></tr>
+              <tr><td style="font-size:11px;font-family:monospace;text-align:left">FXO-2024-198</td><td>AUD/USD</td><td class="neg">-0.29</td><td class="neg">-0.07</td><td class="neg">-55K</td><td class="pos">+2.8K</td><td style="text-align:left"><span style="font-size:10px;background:rgba(22,163,74,.15);color:#16A34A;padding:2px 7px;border-radius:8px">Active</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hdr"><h3>Delta Heatmap by Pair</h3><div class="ph-right"><span style="font-size:10px;color:var(--text-muted)">Net USD equivalent</span></div></div>
+        <div class="heatmap-grid">
+          <div class="hm-cell" style="background:#b91c1c"><div class="hm-pair">USD/SGD</div><div class="hm-val">+28.4M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#1d4ed8"><div class="hm-pair">USD/JPY</div><div class="hm-val">+14.1M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#15803d"><div class="hm-pair">EUR/SGD</div><div class="hm-val">+5.9M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#1d4ed8"><div class="hm-pair">GBP/USD</div><div class="hm-val">+7.2M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#15803d"><div class="hm-pair">USD/CNH</div><div class="hm-val">+4.2M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#991b1b"><div class="hm-pair">EUR/USD</div><div class="hm-val">-8.2M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#7e22ce"><div class="hm-pair">USD/HKD</div><div class="hm-val">-4.8M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#7e22ce"><div class="hm-pair">AUD/USD</div><div class="hm-val">-3.1M</div><div class="hm-label">Net Δ</div></div>
+          <div class="hm-cell" style="background:#374151;grid-column:span 2"><div class="hm-pair">NET TOTAL</div><div class="hm-val">+52.3M</div><div class="hm-label">⚠ Above 50M limit</div></div>
+        </div>
+        <div style="padding:0 14px 14px">
+          <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Colour guide: Dark red = large positive · Purple = large negative · Green/Blue = moderate</div>
+          <div style="font-size:11px;font-weight:600;color:#D97706">⚠ Delta limit exceeded — USD book +52.3M vs limit of 50M. Recommend reducing USD/SGD long positions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot red"></div>Delta Limit Breach</div>
+    <div class="sb-item"><div class="sb-dot amber"></div>Vega 85% utilization</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Gamma: OK</div>
+    <div class="sb-item" style="margin-left:auto">Greeks Engine: LIVE · <span id="lr"></span></div>
+  </div>
+</div>
+
+<script>
+function tick(){const n=new Date();const s=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});document.getElementById('clk').textContent=s+' SGT';document.getElementById('lr').textContent=s+' SGT';}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

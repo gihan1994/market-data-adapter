@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LCM — Position Book</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2563EB;--accent-dark:#1D4ED8;--bg-sidebar:#12172B;--breach:#DC2626;
+  --warn:#D97706;--ok:#16A34A;
+  --bg-main:#F1F5F9;--bg-card:#FFFFFF;--text-main:#1E293B;--text-muted:#64748B;
+  --border:#E2E8F0;--status-bar:#0F172A;--row-hover:#F8FAFC;
+}
+[data-theme="dark"]{
+  --bg-main:#0F172A;--bg-card:#1E293B;--text-main:#F1F5F9;--text-muted:#94A3B8;
+  --border:#334155;--row-hover:#263354;
+}
+body{display:flex;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-main);color:var(--text-main);overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);display:flex;flex-direction:column}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .brand{font-size:11px;font-weight:700;letter-spacing:.12em;color:#64748B;text-transform:uppercase}
+.sb-logo .title{font-size:16px;font-weight:700;color:#F1F5F9;margin-top:2px}
+.sb-logo .sub{font-size:10px;color:#475569;margin-top:1px}
+.sb-section{padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;color:#475569;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94A3B8;font-size:12.5px;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9}
+.nav-item.active{background:rgba(37,99,235,.25);color:#93C5FD;border-left:3px solid #2563EB}
+.nav-item .icon{width:16px;text-align:center;font-size:13px}
+.nav-item .badge{margin-left:auto;background:#DC2626;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.nav-item .badge.amber{background:#D97706}
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-footer .env{font-size:10px;color:#475569}
+.sb-footer .ver{font-size:10px;color:#334155;margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:52px;background:var(--bg-card);border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--text-main)}
+.tb-sub{font-size:11px;color:var(--text-muted);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;font-weight:600;color:var(--text-muted)}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-main)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.theme-btn{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94A3B8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px}
+.content{flex:1;overflow-y:auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.kpi-val{font-size:22px;font-weight:700;line-height:1.1;margin-top:4px;color:var(--text-main)}
+.kpi-val.red{color:#DC2626}.kpi-val.amber{color:#D97706}.kpi-val.green{color:#16A34A}.kpi-val.blue{color:#2563EB}
+.kpi-trend{font-size:10px;color:var(--text-muted);margin-top:4px}
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.panel-hdr{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px}
+.panel-hdr h3{font-size:13px;font-weight:700;color:var(--text-main)}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ph-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ph-badge.blue{background:rgba(37,99,235,.15);color:#2563EB}
+.ph-badge.amber{background:rgba(217,119,6,.15);color:#D97706}
+.ph-badge.red{background:rgba(220,38,38,.15);color:#DC2626}
+.ph-badge.green{background:rgba(22,163,74,.15);color:#16A34A}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--row-hover)}
+tbody td{font-size:11.5px;padding:8px 10px;color:var(--text-main);white-space:nowrap}
+.td-mono{font-family:'Consolas','Courier New',monospace;font-size:11px}
+.sp{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.sp-green{background:rgba(22,163,74,.15);color:#16A34A}
+.sp-amber{background:rgba(217,119,6,.15);color:#D97706}
+.sp-red{background:rgba(220,38,38,.15);color:#DC2626}
+.sp-blue{background:rgba(37,99,235,.15);color:#2563EB}
+.sp-purple{background:rgba(124,58,237,.15);color:#7C3AED}
+.sp-gray{background:rgba(100,116,139,.15);color:#64748B}
+.sp-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.greek-pos{color:#16A34A;font-weight:600}
+.greek-neg{color:#DC2626;font-weight:600}
+.greek-neu{color:var(--text-main)}
+/* NET GREEKS GRID */
+.greeks-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px}
+.gk-card{background:var(--bg-main);border:1px solid var(--border);border-radius:6px;padding:12px}
+.gk-label{font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.gk-val{font-size:20px;font-weight:700;margin-top:4px}
+.gk-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+/* CCY SUMMARY */
+.ccy-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px}
+.ccy-card{background:var(--bg-main);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.ccy-pair{font-size:12px;font-weight:700;color:var(--text-main)}
+.ccy-net{font-size:14px;font-weight:700;margin-top:4px}
+.ccy-count{font-size:10px;color:var(--text-muted);margin-top:2px}
+/* Filter bar */
+.filter-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.filter-bar input,.filter-bar select{padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:var(--bg-main);color:var(--text-main);font-size:12px}
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:18px;padding:6px 18px;background:var(--status-bar);flex-shrink:0;border-top:1px solid #1E293B}
+.sb-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B}
+.sb-dot{width:6px;height:6px;border-radius:50%}
+.sb-dot.green{background:#16A34A;box-shadow:0 0 4px #16A34A}
+.sb-dot.amber{background:#D97706}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">LCM Platform</div>
+    <div class="title">Life Cycle Mgmt</div>
+    <div class="sub">FX Options · Barrier Monitor</div>
+  </div>
+  <div class="sb-section">Monitoring</div>
+  <div class="nav-item" onclick="location.href='barrier-monitor-mock-screen.html'"><span class="icon">⬡</span>Barrier Monitor<span class="badge">3</span></div>
+  <div class="nav-item" onclick="location.href='rate-dashboard.html'"><span class="icon">📈</span>Rate Dashboard</div>
+  <div class="nav-item" onclick="location.href='alert-manager.html'"><span class="icon">🔔</span>Alert Manager<span class="badge amber">8</span></div>
+  <div class="nav-item" onclick="location.href='event-stream.html'"><span class="icon">⚡</span>Event Stream</div>
+  <div class="sb-section">Positions</div>
+  <div class="nav-item active"><span class="icon">📒</span>Position Book</div>
+  <div class="nav-item" onclick="location.href='trade-blotter.html'"><span class="icon">🗒️</span>Trade Blotter</div>
+  <div class="nav-item" onclick="location.href='greeks-monitor.html'"><span class="icon">🔢</span>Greeks Monitor</div>
+  <div class="nav-item" onclick="location.href='pl-analysis.html'"><span class="icon">💹</span>P&amp;L Analysis</div>
+  <div class="sb-section">Risk &amp; Control</div>
+  <div class="nav-item" onclick="location.href='risk-limits.html'"><span class="icon">🛡️</span>Risk Limits</div>
+  <div class="nav-item" onclick="location.href='murex-gateway.html'"><span class="icon">🔗</span>Murex Gateway</div>
+  <div class="nav-item" onclick="location.href='audit-trail.html'"><span class="icon">📋</span>Audit Trail</div>
+  <div class="sb-section">System</div>
+  <div class="nav-item" onclick="location.href='connectivity.html'"><span class="icon">🌐</span>Connectivity</div>
+  <div class="nav-item" onclick="location.href='configuration.html'"><span class="icon">⚙️</span>Configuration</div>
+  <div class="sb-footer">
+    <div class="env">Environment: UAT</div>
+    <div class="ver">v2.4.1 · LSEG RTDS</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Position Book</div>
+      <div class="tb-sub">FX Options · American Barrier Positions · Greeks</div>
+    </div>
+    <div class="tb-right">
+      <span class="clock" id="clk">--:--:-- SGT</span>
+      <button class="btn btn-outline btn-sm">Export CSV</button>
+      <button class="btn btn-primary btn-sm">+ New Position</button>
+      <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Total Positions</div><div class="kpi-val blue">47</div><div class="kpi-trend">Long: 28 · Short: 19</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total Notional</div><div class="kpi-val">USD 2.4B</div><div class="kpi-trend">↑ 120M vs yesterday</div></div>
+      <div class="kpi-card"><div class="kpi-label">Net Delta</div><div class="kpi-val amber">USD 52.3M</div><div class="kpi-trend">↑ Above limit 50M</div></div>
+      <div class="kpi-card"><div class="kpi-label">Net Vega</div><div class="kpi-val green">USD 8.4M</div><div class="kpi-trend">Within limits</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total MTM P&amp;L</div><div class="kpi-val green">+USD 1.24M</div><div class="kpi-trend">Today unrealised</div></div>
+    </div>
+
+    <!-- Net Greeks Summary -->
+    <div class="panel">
+      <div class="panel-hdr"><h3>Net Greeks — All Books</h3><div class="ph-right"><span class="ph-badge blue">As of <span id="greeks-ts"></span></span></div></div>
+      <div class="greeks-grid">
+        <div class="gk-card"><div class="gk-label">Net Delta (Δ)</div><div class="gk-val" style="color:#D97706">+USD 52.3M</div><div class="gk-sub">Limit: 50M · ⚠ Exceeded</div></div>
+        <div class="gk-card"><div class="gk-label">Net Gamma (Γ)</div><div class="gk-val" style="color:#16A34A">+USD 1.82M</div><div class="gk-sub">Limit: 5M · OK</div></div>
+        <div class="gk-card"><div class="gk-label">Net Vega (ν)</div><div class="gk-val" style="color:#16A34A">+USD 8.4M</div><div class="gk-sub">Limit: 15M · OK</div></div>
+        <div class="gk-card"><div class="gk-label">Net Theta (Θ)</div><div class="gk-val" style="color:#DC2626">-USD 124K/day</div><div class="gk-sub">Time decay cost</div></div>
+      </div>
+    </div>
+
+    <!-- CCY Net Summary -->
+    <div class="panel">
+      <div class="panel-hdr"><h3>Net Notional by Currency Pair</h3></div>
+      <div class="ccy-row">
+        <div class="ccy-card"><div class="ccy-pair">USD/SGD</div><div class="ccy-net" style="color:#16A34A">+USD 320M</div><div class="ccy-count">8 positions</div></div>
+        <div class="ccy-card"><div class="ccy-pair">EUR/USD</div><div class="ccy-net" style="color:#DC2626">-USD 180M</div><div class="ccy-count">6 positions</div></div>
+        <div class="ccy-card"><div class="ccy-pair">GBP/USD</div><div class="ccy-net" style="color:#16A34A">+USD 95M</div><div class="ccy-count">5 positions</div></div>
+        <div class="ccy-card"><div class="ccy-pair">USD/JPY</div><div class="ccy-net" style="color:#16A34A">+USD 430M</div><div class="ccy-count">7 positions</div></div>
+        <div class="ccy-card"><div class="ccy-pair">AUD/USD</div><div class="ccy-net" style="color:#DC2626">-USD 60M</div><div class="ccy-count">4 positions</div></div>
+        <div class="ccy-card"><div class="ccy-pair">EUR/SGD</div><div class="ccy-net" style="color:#16A34A">+USD 150M</div><div class="ccy-count">5 positions</div></div>
+      </div>
+    </div>
+
+    <!-- Positions Table -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <h3>Open Positions</h3>
+        <div class="ph-right">
+          <span class="ph-badge blue">47 Positions</span>
+          <button class="btn btn-outline btn-sm">Columns</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search trade ID, pair…"/>
+        <select><option>All Pairs</option><option>USD/SGD</option><option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option></select>
+        <select><option>All Types</option><option>American Barrier</option><option>European Vanilla</option><option>Digital</option></select>
+        <select><option>All Books</option><option>FX Options Book 1</option><option>FX Options Book 2</option><option>Exotics Book</option></select>
+        <select><option>All Status</option><option>Active</option><option>Near Breach</option><option>Breached</option><option>Expired</option></select>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Trade ID</th><th>Pair</th><th>Option Type</th><th>Barrier</th><th>Direction</th><th>Strike</th><th>Spot Rate</th><th>Notional</th><th>Maturity</th><th>Delta Δ</th><th>Gamma Γ</th><th>Vega ν</th><th>Theta Θ</th><th>MTM P&amp;L</th><th>Status</th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="td-mono">TXN-20240524-001</td><td><b>USD/SGD</b></td><td>Am. Up-and-Out</td><td>1.3500</td><td>Long</td><td>1.3200</td><td class="td-mono">1.3524</td><td>USD 50M</td><td>2024-08-15</td><td class="greek-pos">+0.48</td><td class="greek-pos">+0.12</td><td class="greek-pos">+82K</td><td class="greek-neg">-4.2K</td><td class="greek-neg" style="color:#DC2626">-USD 180K</td><td><span class="sp sp-red"><span class="sp-dot"></span>BREACHED</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-089</td><td><b>EUR/USD</b></td><td>Am. Down-and-Out</td><td>1.0700</td><td>Short</td><td>1.0900</td><td class="td-mono">1.0842</td><td>EUR 40M</td><td>2024-09-30</td><td class="greek-neg">-0.36</td><td class="greek-neg">-0.08</td><td class="greek-neg">-61K</td><td class="greek-pos">+3.1K</td><td class="greek-pos">+USD 92K</td><td><span class="sp sp-amber"><span class="sp-dot"></span>Near Breach</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-112</td><td><b>USD/JPY</b></td><td>Am. Up-and-In</td><td>152.00</td><td>Long</td><td>148.00</td><td class="td-mono">149.88</td><td>USD 80M</td><td>2024-10-31</td><td class="greek-pos">+0.62</td><td class="greek-pos">+0.15</td><td class="greek-pos">+148K</td><td class="greek-neg">-7.8K</td><td class="greek-pos">+USD 214K</td><td><span class="sp sp-amber"><span class="sp-dot"></span>Near Breach</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-067</td><td><b>USD/SGD</b></td><td>Am. Vanilla Call</td><td>—</td><td>Long</td><td>1.3300</td><td class="td-mono">1.3521</td><td>USD 5M</td><td>2024-05-25</td><td class="greek-pos">+0.82</td><td class="greek-pos">+0.04</td><td class="greek-pos">+4K</td><td class="greek-neg">-12.4K</td><td class="greek-pos">+USD 110K</td><td><span class="sp sp-amber"><span class="sp-dot"></span>Expiry T-1</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-145</td><td><b>GBP/USD</b></td><td>Am. Down-and-In</td><td>1.2400</td><td>Long</td><td>1.2800</td><td class="td-mono">1.2719</td><td>GBP 30M</td><td>2024-11-15</td><td class="greek-pos">+0.41</td><td class="greek-pos">+0.09</td><td class="greek-pos">+72K</td><td class="greek-neg">-3.6K</td><td class="greek-pos">+USD 48K</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-198</td><td><b>AUD/USD</b></td><td>Am. Up-and-Out</td><td>0.6800</td><td>Short</td><td>0.6600</td><td class="td-mono">0.6591</td><td>AUD 60M</td><td>2024-12-20</td><td class="greek-neg">-0.29</td><td class="greek-neg">-0.07</td><td class="greek-neg">-55K</td><td class="greek-pos">+2.8K</td><td class="greek-pos">+USD 32K</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-203</td><td><b>EUR/SGD</b></td><td>Am. Down-and-Out</td><td>1.4200</td><td>Long</td><td>1.4500</td><td class="td-mono">1.4487</td><td>EUR 35M</td><td>2025-01-31</td><td class="greek-pos">+0.55</td><td class="greek-pos">+0.11</td><td class="greek-pos">+92K</td><td class="greek-neg">-4.9K</td><td class="greek-pos">+USD 67K</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-218</td><td><b>USD/CNH</b></td><td>Am. Up-and-In</td><td>7.3500</td><td>Long</td><td>7.2000</td><td class="td-mono">7.2184</td><td>USD 100M</td><td>2024-09-15</td><td class="greek-pos">+0.38</td><td class="greek-pos">+0.10</td><td class="greek-pos">+108K</td><td class="greek-neg">-5.7K</td><td class="greek-neg">-USD 23K</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-231</td><td><b>USD/HKD</b></td><td>Am. Down-and-Out</td><td>7.7500</td><td>Short</td><td>7.8100</td><td class="td-mono">7.8224</td><td>USD 200M</td><td>2025-03-28</td><td class="greek-neg">-0.22</td><td class="greek-neg">-0.06</td><td class="greek-neg">-89K</td><td class="greek-pos">+6.2K</td><td class="greek-pos">+USD 154K</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td></tr>
+            <tr><td class="td-mono">FXO-2024-244</td><td><b>USD/SGD</b></td><td>Am. Up-and-Out</td><td>1.3700</td><td>Long</td><td>1.3400</td><td class="td-mono">1.3521</td><td>USD 75M</td><td>2024-07-30</td><td class="greek-pos">+0.71</td><td class="greek-pos">+0.14</td><td class="greek-pos">+95K</td><td class="greek-neg">-8.1K</td><td class="greek-pos">+USD 288K</td><td><span class="sp sp-green"><span class="sp-dot"></span>Active</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot green"></div>Positions: 47 Active</div>
+    <div class="sb-item"><div class="sb-dot green"></div>Greeks Calculated</div>
+    <div class="sb-item"><div class="sb-dot amber"></div>Delta Limit Exceeded</div>
+    <div class="sb-item" style="margin-left:auto">As of: <span id="as-of"></span></div>
+    <div class="sb-item">Pricing Engine: LIVE</div>
+  </div>
+</div>
+
+<script>
+function tick(){
+  const n=new Date();
+  const s=n.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore',hour12:false});
+  document.getElementById('clk').textContent=s+' SGT';
+  document.getElementById('as-of').textContent=s+' SGT';
+  if(document.getElementById('greeks-ts'))document.getElementById('greeks-ts').textContent=s+' SGT';
+}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>
