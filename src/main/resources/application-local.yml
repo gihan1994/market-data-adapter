@@ -12,10 +12,16 @@ redis:
 
 marketdata:
   pod:
+    hall: ${HALL:hall1}
     role: ${POD_ROLE:warm-eligible}
     name: ${POD_NAME:local-pod-0}
   lseg:
+    connection-mode: ${LSEG_CONNECTION_MODE:ON_PREM_TREP}
     mock-mode: ${LSEG_MOCK:true}
+    dacs-username: ${LSEG_DACS_USERNAME:local-user}
+    dacs-position: ${LSEG_DACS_POSITION:127.0.0.1}
+    ads-host: ${LSEG_ADS_HOST:localhost}
+    ads-port: ${LSEG_ADS_PORT:14002}
 
 logging:
   level:

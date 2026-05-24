@@ -7,176 +7,179 @@ All configuration is via Spring profiles + environment variables.
 | Profile | When | Source |
 |---|---|---|
 | `local` | Local dev (Docker Compose or laptop JVM) | `application-local.yml` |
-| `openshift` | Deployed to OpenShift | `application-openshift.yml` |
+| `openshift` | Deployed to OpenShift (hall1 or hall2) | `application-openshift.yml` |
 | `test` | Integration tests with Testcontainers | `src/test/resources/application-test.yml` |
 
-Set via `SPRING_PROFILES_ACTIVE` env var. Default: `local`.
+Set via `SPRING_PROFILES_ACTIVE`. Default: `local`.
 
 ---
 
 ## Environment variables
 
-### Per-pod identity
+### Per-pod identity (cluster + role)
 
 | Env var | Required | Default | Notes |
 |---|---|---|---|
-| `POD_NAME` | yes | `local-pod` | OpenShift downward-API injects `metadata.name`. Used for leader-lock holder, audit trail, metrics tag. |
-| `POD_ROLE` | yes | `warm-eligible` | `warm-eligible` or `cold-only`. Determines whether pod opens an EMA session at startup. |
+| `HALL` | yes | `hall1` | Cluster identifier — `hall1` or `hall2`. Set via per-hall ConfigMap (`market-data-service-config.hall`). |
+| `POD_ROLE` | yes | `warm-eligible` | `warm-eligible` or `cold-only`. Determines whether the pod opens an EMA session at startup. |
+| `POD_NAME` | yes | `local-pod` | OpenShift downwardAPI `metadata.name`. Used in leader-lock holder ID, audit log, metrics. |
 
 ### Database
 
 | Env var | Required | Default | Notes |
 |---|---|---|---|
-| `DB_URL` | yes | `jdbc:postgresql://localhost:5432/marketdata` | JDBC URL |
+| `DB_URL` | yes | `jdbc:postgresql://localhost:5432/marketdata` | JDBC URL — cross-hall HA DB |
 | `DB_USER` | yes | `marketdata` | |
-| `DB_PASSWORD` | yes | `marketdata` | Use a Secret in OpenShift |
+| `DB_PASSWORD` | yes | _(none)_ | OpenShift Secret |
 
-### Redis
+### Redis (Enterprise)
 
 | Env var | Required | Default | Notes |
 |---|---|---|---|
-| `REDIS_HOST` | yes (if not cluster) | `localhost` | |
+| `REDIS_HOST` | local dev | `localhost` | Single-node mode |
 | `REDIS_PORT` | no | `6379` | |
-| `REDIS_PASSWORD` | no | _(none)_ | Use a Secret in OpenShift |
-| `REDIS_CLUSTER` | no | `false` | Set `true` for cluster mode |
-| `REDIS_CLUSTER_NODES` | yes (if cluster) | _(none)_ | Comma-separated `host:port` list |
+| `REDIS_PASSWORD` | no | _(none)_ | OpenShift Secret |
+| `REDIS_CLUSTER` | OpenShift | `false` | Set `true` for Enterprise Redis cluster |
+| `REDIS_CLUSTER_NODES` | OpenShift | _(none)_ | Comma-separated `host:port`. The cluster spans both halls. |
 
 ### Kafka
 
 | Env var | Required | Default | Notes |
 |---|---|---|---|
-| `KAFKA_BOOTSTRAP` | yes | `localhost:9092` | Bootstrap server(s) |
-| `KAFKA_SASL_JAAS` | OpenShift only | _(none)_ | JAAS config string for SASL/SCRAM auth |
+| `KAFKA_BOOTSTRAP` | yes | `localhost:9092` | Multi-DC Kafka bootstrap |
+| `KAFKA_SASL_JAAS` | OpenShift | _(none)_ | JAAS config for SASL/SCRAM |
 
-### LSEG
+### LSEG connection mode
 
 | Env var | Required | Default | Notes |
 |---|---|---|---|
-| `LSEG_CLIENT_ID` | prod | _(empty)_ | RTO V2 OAuth client ID |
-| `LSEG_CLIENT_SECRET` | prod | _(empty)_ | RTO V2 OAuth client secret. **Always use a Secret.** |
+| `LSEG_CONNECTION_MODE` | yes | `ON_PREM_TREP` | `ON_PREM_TREP` or `RTO_CLOUD` |
+| `LSEG_MOCK` | local dev | `false` | `true` skips real EMA connection for dev/test |
+
+### LSEG — on-prem TREP (DACS auth) ⭐
+
+Used when `LSEG_CONNECTION_MODE=ON_PREM_TREP` (production default).
+
+| Env var | Required | Default | Notes |
+|---|---|---|---|
+| `LSEG_DACS_USERNAME` | yes | _(empty)_ | DACS named user. **Same value in both halls.** OpenShift Secret. |
+| `LSEG_DACS_POSITION` | yes | _(empty)_ | Static egress IP of THIS hall's namespace. **Different per hall.** Per-hall ConfigMap. |
+| `LSEG_DACS_APPLICATION_ID` | yes | `256` | LSEG application ID. Same in both halls. |
+| `LSEG_ADS_HOST` | yes | _(empty)_ | Primary ADS endpoint for THIS hall. Per-hall ConfigMap. |
+| `LSEG_ADS_PORT` | no | `14002` | |
+| `LSEG_ADS_BACKUP_HOST` | yes | _(empty)_ | Backup ADS in SAME hall (for ChannelSet failover). |
+| `LSEG_ADS_BACKUP_PORT` | no | `14002` | |
+| `LSEG_SERVICE_NAME` | yes | `ELEKTRON_DD` | ADS service name |
+
+### LSEG — RTO cloud (OAuth2)
+
+Used when `LSEG_CONNECTION_MODE=RTO_CLOUD`. Optional path — kept for hybrid deployments.
+
+| Env var | Required | Default | Notes |
+|---|---|---|---|
+| `LSEG_CLIENT_ID` | RTO only | _(empty)_ | OAuth2 V2 client ID |
+| `LSEG_CLIENT_SECRET` | RTO only | _(empty)_ | OpenShift Secret |
 | `LSEG_TOKEN_URL` | no | `https://api.refinitiv.com/auth/oauth2/v2/token` | |
-| `LSEG_MOCK` | local dev | `false` | `true` skips real EMA connection — useful for dev/test |
 
 ---
 
-## Application properties
+## `marketdata.*` application properties
 
-All under the `marketdata.*` prefix. Defined in `MarketDataProperties.java` with validation.
+Defined in `MarketDataProperties.java` with `@Validated` constraints. The properties tree:
 
-### `marketdata.pod`
+```yaml
+marketdata:
+  pod:
+    hall: hall1                  # ${HALL}
+    role: warm-eligible          # ${POD_ROLE}
+    name: market-data-service-0  # ${POD_NAME}
+  leader:
+    lock-key: marketdata:leader:lock
+    lock-ttl-seconds: 5
+    heartbeat-seconds: 2
+    acquire-retry-seconds: 1
+  lseg:
+    connection-mode: ON_PREM_TREP
+    dacs-username: ${LSEG_DACS_USERNAME}
+    dacs-position: ${LSEG_DACS_POSITION}
+    dacs-application-id: ${LSEG_DACS_APPLICATION_ID}
+    ads-host: ${LSEG_ADS_HOST}
+    ads-port: ${LSEG_ADS_PORT}
+    ads-backup-host: ${LSEG_ADS_BACKUP_HOST}
+    ads-backup-port: ${LSEG_ADS_BACKUP_PORT}
+    service-name: ELEKTRON_DD
+    consumer-name: Consumer_1
+    mock-mode: false
+  subscription:
+    drain-grace-seconds: 30
+    refcount-key-prefix: "marketdata:subscription:refcount:"
+    active-rics-key: "marketdata:ric:active"
+    price-key-prefix: "marketdata:ric:price:"
+    last-published-key-prefix: "marketdata:ric:last-published:"
+    price-ttl-seconds: 60
+  kafka:
+    topic-requests: market-data-requests
+    topic-updates: market-data-updates
+    topic-control: market-data-control
+  recovery:
+    gap-threshold-millis: 2000
+    snapshot-on-recovery: true
+```
 
-| Property | Default | Description |
+---
+
+## Per-hall configuration
+
+Each OpenShift cluster gets its own `market-data-service-config` ConfigMap. The differences:
+
+| Key | hall1 ConfigMap | hall2 ConfigMap |
 |---|---|---|
-| `marketdata.pod.role` | `warm-eligible` | See `POD_ROLE` env var |
-| `marketdata.pod.name` | `local-pod` | See `POD_NAME` env var |
+| `hall` | `hall1` | `hall2` |
+| `kafka.bootstrap` | `kafka-...hall1.svc:9092,...` | `kafka-...hall2.svc:9092,...` |
+| `redis.cluster-nodes` | `redis-...hall1.svc:10000,...` | `redis-...hall2.svc:10000,...` (same cluster, different access points) |
+| `lseg.ads-host` | `trep-lb-1.trep.local` ⭐ same in both halls | `trep-lb-1.trep.local` |
+| `lseg.ads-backup-host` | `trep-lb-2.trep.local` ⭐ same in both halls | `trep-lb-2.trep.local` |
+| `lseg.dacs-position` | `10.10.1.100` (hall1 egress IP) | `10.10.2.100` (hall2 egress IP) |
 
-### `marketdata.leader`
+Identical across halls:
+- Secrets (`market-data-service-db`, `-kafka`, `-redis`, `-lseg`)
+- `lseg.service-name`, `lseg.dacs-application-id`
+- `lseg.dacs-username` (same DACS user → same secret in both)
+- Pod role assignments (each hall has pod-0 = warm-eligible, pod-1 = cold-only)
 
-| Property | Default | Description |
-|---|---|---|
-| `marketdata.leader.lock-key` | `marketdata:leader:lock` | Redis key for the distributed lock |
-| `marketdata.leader.lock-ttl-seconds` | `5` | Lock TTL. Lower = faster failover, higher risk of false-positive on GC pause |
-| `marketdata.leader.heartbeat-seconds` | `2` | How often the leader renews the lock |
-| `marketdata.leader.acquire-retry-seconds` | `1` | (unused currently — heartbeat doubles as retry) |
+See `deploy/openshift/hall1/configmap.yaml` and `deploy/openshift/hall2/configmap.yaml` for the actual values.
 
-### `marketdata.lseg`
+---
 
-| Property | Default | Description |
-|---|---|---|
-| `marketdata.lseg.client-id` | _empty_ | See `LSEG_CLIENT_ID` |
-| `marketdata.lseg.client-secret` | _empty_ | See `LSEG_CLIENT_SECRET` |
-| `marketdata.lseg.token-url` | `https://api.refinitiv.com/auth/oauth2/v2/token` | OAuth2 token endpoint |
-| `marketdata.lseg.scope` | `trapi` | OAuth2 scope |
-| `marketdata.lseg.ema-config-file` | `classpath:EmaConfig.xml` | Path to EMA config XML |
-| `marketdata.lseg.consumer-name` | `Consumer_1` | Must match a `<Consumer>` in `EmaConfig.xml` |
-| `marketdata.lseg.service-name` | `ELEKTRON_DD` | LSEG service name |
-| `marketdata.lseg.mock-mode` | `false` | See `LSEG_MOCK` |
+## EMA configuration (`EmaConfig.xml`)
 
-### `marketdata.subscription`
+Located at `src/main/resources/EmaConfig.xml`. Key items:
 
-| Property | Default | Description |
-|---|---|---|
-| `marketdata.subscription.drain-grace-seconds` | `30` | How long to wait after refcount→0 before closing the EMA stream |
-| `marketdata.subscription.batch-resubscribe-size` | `100` | (reserved — batch size for resubscription during failover) |
-| `marketdata.subscription.refcount-key-prefix` | `marketdata:subscription:refcount:` | Redis key prefix |
-| `marketdata.subscription.active-rics-key` | `marketdata:ric:active` | Redis sorted-set key |
-| `marketdata.subscription.price-key-prefix` | `marketdata:ric:price:` | Redis key prefix for latest-price cache |
-| `marketdata.subscription.last-published-key-prefix` | `marketdata:ric:last-published:` | Redis key prefix for gap-tracking timestamps |
-| `marketdata.subscription.price-ttl-seconds` | `60` | TTL on cached prices |
-
-### `marketdata.kafka`
-
-| Property | Default | Description |
-|---|---|---|
-| `marketdata.kafka.topic-requests` | `market-data-requests` | Subscribe / unsubscribe requests in |
-| `marketdata.kafka.topic-updates` | `market-data-updates` | Live ticks out |
-| `marketdata.kafka.topic-control` | `market-data-control` | Gap + recovery events out |
-
-### `marketdata.recovery`
-
-| Property | Default | Description |
-|---|---|---|
-| `marketdata.recovery.gap-threshold-millis` | `2000` | Below this, the gap is ignored (transient hiccup, not a failover) |
-| `marketdata.recovery.snapshot-on-recovery` | `true` | (reserved — emit a snapshot tick alongside GAP_DETECTED) |
+- **Consumer_1** uses `ChannelSet="Channel_TREP_LB_Primary, Channel_TREP_LB_Backup"` for transparent failover between the two TREP LB endpoints (no new DACS login on switchover).
+- Channel host/port values in the XML are **placeholders** — the actual endpoint is set via `OmmConsumerConfig.host()` from `LSEG_ADS_HOST` env var at runtime.
+- `Channel_RTO` is defined but only used when `connection-mode=RTO_CLOUD`. Switch the consumer's `Channel` from `ChannelSet` to `Channel_RTO` if migrating to cloud.
+- `ReconnectAttemptLimit=-1` (unlimited), `ReconnectMinDelay=2000ms`, `ReconnectMaxDelay=30000ms`.
+- `Dictionary_1` = `ChannelDictionary` (downloads from ADS). For air-gapped deployments, switch to `FileDictionary` + local `RDMFieldDictionary` and `enumtype.def`.
 
 ---
 
 ## LSEG credentials
 
-For production, obtain LSEG **RTO V2 OAuth2 client credentials** from your account manager. They look like:
+For production, obtain from your TREP admin team:
 
-```
-client_id     = GE-A-12345678-9-0123
-client_secret = <opaque string>
-```
+1. **DACS named user** + password (we suggest `marketdata-adapter`)
+2. **Egress IP whitelisting** — both hall egress IPs (`10.10.1.100` and `10.10.2.100`) added to the user's allowed-positions list
+3. **MaxLogins ≥ 3** on that user (allows steady state of 2 + brief overlap during failover)
+4. **Application ID** — confirm `256` works, or get one assigned
 
-Store them as a Kubernetes Secret:
+Store in OpenShift Secret:
 
 ```bash
 oc create secret generic market-data-service-lseg \
-  --from-literal=client-id='GE-A-12345678-9-0123' \
-  --from-literal=client-secret='<opaque string>'
+  --from-literal=dacs-username='marketdata-adapter' \
+  --from-literal=dacs-password='<from-trep-team>'
 ```
 
-The StatefulSet manifest already wires these into the `LSEG_CLIENT_ID` / `LSEG_CLIENT_SECRET` env vars.
+> Note: the LOGIN domain in EMA uses username + position + applicationId. Password is configured via `OmmConsumerConfig.password()` if your DACS requires it — most installations use position-based auth only. See `OmmConsumerManager.configureForOnPremTrep()`.
 
-For local development, **set `LSEG_MOCK=true`** to skip the real connection.
-
----
-
-## EMA configuration
-
-The EMA SDK is configured via `src/main/resources/EmaConfig.xml`. Defaults:
-
-- `Consumer_1` uses `Channel_RTO` (cloud / RTO)
-- `Channel_RTO` has `EncryptedProtocolType=RSSL_SOCKET` + `EnableSessionManagement=1` for automatic OAuth2 + service discovery
-- Region: `us-east-1` — change `<Location>` to `eu-west-1`, `ap-northeast-1`, etc. as appropriate
-- Reconnection: unlimited attempts, 2s min delay, 30s max delay
-
-For on-prem ADS deployments, switch the consumer's `Channel` to `Channel_RSSL` and set the `Host`/`Port` accordingly.
-
----
-
-## Per-pod role assignment (OpenShift)
-
-The StatefulSet template uses a `ConfigMap`-as-key-lookup pattern:
-
-```yaml
-env:
-  - name: POD_NAME
-    valueFrom: { fieldRef: { fieldPath: metadata.name } }
-  - name: POD_ROLE
-    valueFrom: { configMapKeyRef: { name: market-data-service-pod-roles, key: $(POD_NAME) } }
-```
-
-The ConfigMap (`deploy/openshift/configmap.yaml`) maps pod names to roles:
-
-```yaml
-data:
-  market-data-service-0: "warm-eligible"
-  market-data-service-1: "warm-eligible"
-  market-data-service-2: "cold-only"
-  market-data-service-3: "cold-only"
-```
-
-To change the warm/cold split, edit the ConfigMap and `oc rollout restart statefulset/market-data-service`.
+For local development, **set `LSEG_MOCK=true`** to skip the real connection. See [DACS_LICENSING.md](DACS_LICENSING.md) for the full licensing model.

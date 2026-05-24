@@ -10,6 +10,9 @@ spring:
       sasl.mechanism: SCRAM-SHA-512
       sasl.jaas.config: ${KAFKA_SASL_JAAS}
 
+# Enterprise Redis is shared across both halls (cross-hall connectivity provided by
+# Redis Enterprise active-active or master-replica). The connection endpoint may differ
+# per hall but the keyspace is the same → ensures one global leader.
 redis:
   cluster-enabled: true
   cluster-nodes: ${REDIS_CLUSTER_NODES}
@@ -17,9 +20,30 @@ redis:
 
 marketdata:
   pod:
-    role: ${POD_ROLE}        # injected from StatefulSet: ordinal 0,1 = warm-eligible; 2,3 = cold-only
-    name: ${POD_NAME}        # injected via downwardAPI: metadata.name
+    # HALL is injected per cluster via ConfigMap (hall1 ConfigMap → "hall1", hall2 → "hall2")
+    hall: ${HALL}
+    # POD_ROLE per-pod: ordinal 0 → warm-eligible, ordinal 1 → cold-only (set in ConfigMap)
+    role: ${POD_ROLE}
+    # POD_NAME via downwardAPI: metadata.name
+    name: ${POD_NAME}
+
+  leader:
+    # Global lock — same key value in both halls
+    lock-key: marketdata:leader:lock
+
   lseg:
+    connection-mode: ON_PREM_TREP
+    # DACS_USERNAME is the SAME for all 4 pods across both halls (per-user licensing)
+    dacs-username: ${LSEG_DACS_USERNAME}
+    # DACS_POSITION = static egress IP of THIS hall's namespace (different per hall, whitelisted at TREP)
+    dacs-position: ${LSEG_DACS_POSITION}
+    dacs-application-id: ${LSEG_DACS_APPLICATION_ID}
+    # ADS endpoints per hall — set via per-hall ConfigMap
+    ads-host: ${LSEG_ADS_HOST}
+    ads-port: ${LSEG_ADS_PORT}
+    ads-backup-host: ${LSEG_ADS_BACKUP_HOST}
+    ads-backup-port: ${LSEG_ADS_BACKUP_PORT}
+    service-name: ${LSEG_SERVICE_NAME}
     mock-mode: false
 
 logging:

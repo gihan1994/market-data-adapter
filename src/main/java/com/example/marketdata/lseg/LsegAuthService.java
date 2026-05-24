@@ -1,6 +1,7 @@
 package com.example.marketdata.lseg;
 
 import com.example.marketdata.config.MarketDataProperties;
+import com.example.marketdata.config.MarketDataProperties.Lseg.ConnectionMode;
 import com.example.marketdata.domain.AuditEventType;
 import com.example.marketdata.domain.SubscriptionAuditEntity;
 import com.example.marketdata.repository.SubscriptionAuditRepository;
@@ -21,13 +22,18 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Manages the LSEG OAuth2 V2 token. The EMA SDK actually handles its own token internally
- * when {@code EnableSessionManagement = 1} is set; this service is for:
- *  - diagnostic visibility (Redis cache of latest token + acquisition time)
- *  - non-EMA REST calls (service discovery, reference data lookups)
- *  - sharing token expiry status across pods so warm standby can pre-validate creds
+ * OAuth2 V2 token management — used <strong>only</strong> for the RTO cloud connection mode.
  *
- * Token URL: https://api.refinitiv.com/auth/oauth2/v2/token
+ * <p>For on-prem TREP (the production deployment), DACS authentication is performed by EMA
+ * itself in the LOGIN domain handshake — there is no separate OAuth flow. This service
+ * becomes a no-op when {@code marketdata.lseg.connection-mode = ON_PREM_TREP}.
+ *
+ * <p>When active (RTO mode), this service:
+ * <ul>
+ *   <li>fetches tokens via {@code client_credentials} grant</li>
+ *   <li>caches them in Redis (diagnostic only — EMA SDK still manages its own token internally)</li>
+ *   <li>proactively refreshes 5 minutes before expiry</li>
+ * </ul>
  */
 @Service
 @Slf4j
@@ -51,15 +57,33 @@ public class LsegAuthService {
 
     @PostConstruct
     void init() {
+        if (props.getLseg().getConnectionMode() == ConnectionMode.ON_PREM_TREP) {
+            log.info("ON_PREM_TREP mode — OAuth2 token service is disabled (DACS auth used instead)");
+            return;
+        }
         this.restClient = RestClient.builder()
                 .baseUrl(props.getLseg().getTokenUrl())
                 .build();
+    }
+
+    private boolean isActive() {
+        return props.getLseg().getConnectionMode() == ConnectionMode.RTO_CLOUD
+                && !props.getLseg().isMockMode();
     }
 
     /**
      * Synchronously fetch a fresh OAuth2 token via client_credentials grant.
      */
     public AuthToken fetchToken() {
+        if (!isActive()) {
+            log.debug("OAuth2 disabled (ON_PREM_TREP or mock mode) — returning placeholder token");
+            return AuthToken.builder()
+                    .accessToken("n/a-on-prem-trep")
+                    .tokenType("Bearer")
+                    .expiresInSeconds(3600)
+                    .acquiredAtEpochMs(Instant.now().toEpochMilli())
+                    .build();
+        }
         if (props.getLseg().isMockMode()) {
             log.debug("Mock mode — returning fake token");
             return AuthToken.builder()
@@ -129,7 +153,7 @@ public class LsegAuthService {
     /** Refresh proactively before expiry. Active leader runs this. */
     @Scheduled(fixedDelay = 60_000)
     void scheduledRefresh() {
-        if (props.getLseg().isMockMode()) return;
+        if (!isActive()) return;
         try {
             RBucket<String> bucket = redisson.getBucket(REDIS_TOKEN_KEY);
             String cached = bucket.get();

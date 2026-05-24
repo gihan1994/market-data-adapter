@@ -1,0 +1,37 @@
+# =====================================================================
+#  ConfigMaps for HALL 1
+# =====================================================================
+# TREP is shared between halls (single LB pair). The only hall-specific value
+# is the namespace egress IP (used as DACS position).
+# =====================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: market-data-service-config
+data:
+  hall: "hall1"
+
+  # ----- Kafka (hall1 brokers) -----
+  kafka.bootstrap: "kafka-broker-0.hall1.svc:9092,kafka-broker-1.hall1.svc:9092,kafka-broker-2.hall1.svc:9092"
+
+  # ----- Redis (Enterprise active-active — same keyspace across halls) -----
+  redis.cluster-nodes: "redis-enterprise-0.hall1.svc:10000,redis-enterprise-1.hall1.svc:10001,redis-enterprise-2.hall1.svc:10002"
+
+  # ----- LSEG / TREP (SHARED LB endpoints — same values in hall2 configmap) -----
+  lseg.ads-host:         "trep-lb-1.trep.local"
+  lseg.ads-port:         "14002"
+  lseg.ads-backup-host:  "trep-lb-2.trep.local"
+  lseg.ads-backup-port:  "14002"
+  lseg.service-name:     "ELEKTRON_DD"
+  lseg.dacs-application-id: "256"
+
+  # Static egress IP for hall1's namespace (whitelisted at DACS, different from hall2)
+  lseg.dacs-position:    "10.10.1.100"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: market-data-service-pod-roles
+data:
+  market-data-service-0: "warm-eligible"   # active leader candidate
+  market-data-service-1: "cold-only"        # within-hall failover capacity

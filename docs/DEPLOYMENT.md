@@ -1,271 +1,300 @@
-# OpenShift Deployment
+# Dual-Cluster OpenShift Deployment
 
 ## Prerequisites
 
-- OpenShift cluster (4.10+) with `oc` CLI
-- A namespace (`oc new-project marketdata`)
-- Image registry access (internal OpenShift registry or external)
-- External infrastructure available:
-  - PostgreSQL (e.g. CloudNativePG, Crunchy Postgres)
-  - Redis (with cluster mode if HA required)
-  - Kafka (e.g. Strimzi, Confluent Operator)
-- LSEG RTO V2 OAuth credentials
+| Item | Detail |
+|---|---|
+| OpenShift clusters | 2 — one in hall1, one in hall2 (versions 4.10+) |
+| `oc` contexts | Configured for both clusters (e.g. `hall1-cluster` and `hall2-cluster`) |
+| Container registry | Reachable from both clusters (internal registry, Quay, or ECR) |
+| **Enterprise Redis** | Active-active across both halls (Redis Enterprise CRDB or master-replica) |
+| PostgreSQL | Cross-hall HA (Crunchy Postgres synchronous standby, or AWS RDS Multi-AZ) |
+| Kafka | Multi-DC (Strimzi MirrorMaker, Confluent Replicator, or stretched cluster) |
+| LSEG TREP | Single load balancer (HA pair) reachable from BOTH halls. Hall1 and hall2 egress IPs whitelisted at DACS. |
 
 ## File layout
 
 ```
 deploy/openshift/
-├── statefulset.yaml          # 4-replica StatefulSet + headless service
-├── service.yaml              # ClusterIP service for HTTP/actuator
-├── configmap.yaml            # Kafka/Redis endpoints + pod-role map
-├── secret.template.yaml      # Template for DB/Kafka/Redis/LSEG secrets
-├── pdb.yaml                  # PodDisruptionBudget — at most 1 pod down
-└── README.md                 # Operational notes
+├── base/                          # identical across both halls
+│   ├── statefulset.yaml           # 2 replicas per hall (= 4 pods total)
+│   ├── service.yaml
+│   ├── pdb.yaml
+│   └── secret.template.yaml       # SAME secrets applied to both halls
+├── hall1/
+│   └── configmap.yaml             # HALL=hall1 + hall1 ADS + 10.10.1.100 egress IP
+└── hall2/
+    └── configmap.yaml             # HALL=hall2 + hall2 ADS + 10.10.2.100 egress IP
 ```
 
 ---
 
-## Step-by-step deployment
+## Step-by-step
 
 ### 1. Build & push the image
 
 ```bash
-# Tag for the internal registry
-docker tag market-data-service:dev \
-  image-registry.openshift-image-registry.svc:5000/marketdata/market-data-service:1.0.0
-
-# OR push to your external registry (Quay, ECR, etc.)
-docker tag market-data-service:dev quay.io/yourorg/market-data-service:1.0.0
-docker push quay.io/yourorg/market-data-service:1.0.0
+docker build -t market-data-adapter:1.0.0 .
+docker tag market-data-adapter:1.0.0 <registry>/marketdata/market-data-adapter:1.0.0
+docker push <registry>/marketdata/market-data-adapter:1.0.0
 ```
 
-If using the internal registry, you can also use BuildConfig:
+Both clusters must be able to pull this image. If using OpenShift's internal registry per cluster, push to both.
+
+### 2. Coordinate with TREP team
+
+Before any deployment:
+- [ ] **DACS user created** (e.g., `marketdata-adapter`)
+- [ ] **MaxLogins ≥ 3** on that user
+- [ ] **Both hall egress IPs whitelisted** (`10.10.1.100`, `10.10.2.100`)
+- [ ] **Application ID 256** confirmed (or get one assigned)
+- [ ] **Product entitlements** added to the user
+
+Capture the DACS password — you'll need it for the Secret in step 4.
+
+### 3. Prepare ConfigMaps per hall
+
+Edit `deploy/openshift/hall1/configmap.yaml` and `hall2/configmap.yaml` with the **real** values:
+
+- `lseg.ads-host` / `ads-backup-host` for each hall
+- `lseg.dacs-position` (the actual whitelisted egress IPs)
+- `kafka.bootstrap` per hall
+- `redis.cluster-nodes` per hall (same logical cluster, different access endpoints)
+
+### 4. Prepare and apply Secrets (same in both halls)
 
 ```bash
-oc new-build --binary --strategy=docker --name=market-data-service
-oc start-build market-data-service --from-dir=. --follow
+cp deploy/openshift/base/secret.template.yaml /tmp/secret.yaml
+# Edit: fill REPLACE-ME values:
+#   - dacs-username: marketdata-adapter
+#   - db / kafka / redis passwords
+oc --context hall1-cluster apply -f /tmp/secret.yaml
+oc --context hall2-cluster apply -f /tmp/secret.yaml
+rm /tmp/secret.yaml
 ```
 
-### 2. Create the namespace and apply ConfigMaps
+For production, use SealedSecrets or ExternalSecrets — never commit real values.
+
+### 5. Deploy to hall1
 
 ```bash
-oc new-project marketdata
-oc apply -f deploy/openshift/configmap.yaml
+oc --context hall1-cluster new-project marketdata
+oc --context hall1-cluster apply -f deploy/openshift/hall1/configmap.yaml
+oc --context hall1-cluster apply -f deploy/openshift/base/statefulset.yaml
+oc --context hall1-cluster apply -f deploy/openshift/base/service.yaml
+oc --context hall1-cluster apply -f deploy/openshift/base/pdb.yaml
+oc --context hall1-cluster rollout status statefulset/market-data-service
 ```
 
-Edit `configmap.yaml` first to point at your real infrastructure endpoints.
-
-### 3. Create Secrets
-
-Copy the template and fill in real values:
+### 6. Deploy to hall2
 
 ```bash
-cp deploy/openshift/secret.template.yaml /tmp/secret.yaml
-# Edit /tmp/secret.yaml — replace all REPLACE-ME values
-oc apply -f /tmp/secret.yaml
-rm /tmp/secret.yaml   # don't leave credentials on disk
+oc --context hall2-cluster new-project marketdata
+oc --context hall2-cluster apply -f deploy/openshift/hall2/configmap.yaml
+oc --context hall2-cluster apply -f deploy/openshift/base/statefulset.yaml
+oc --context hall2-cluster apply -f deploy/openshift/base/service.yaml
+oc --context hall2-cluster apply -f deploy/openshift/base/pdb.yaml
+oc --context hall2-cluster rollout status statefulset/market-data-service
 ```
 
-Or use individual `oc create secret` commands (safer for CI/CD):
+### 7. Watch leader election converge
 
 ```bash
-oc create secret generic market-data-service-db \
-  --from-literal=url='jdbc:postgresql://postgres-primary.db.svc:5432/marketdata' \
-  --from-literal=user='marketdata' \
-  --from-literal=password=$(read -rs PW; echo "$PW")
-
-oc create secret generic market-data-service-lseg \
-  --from-literal=client-id='YOUR-CLIENT-ID' \
-  --from-literal=client-secret=$(read -rs SEC; echo "$SEC")
-
-oc create secret generic market-data-service-redis \
-  --from-literal=password=$(read -rs PW; echo "$PW")
-
-oc create secret generic market-data-service-kafka \
-  --from-literal=sasl-jaas='org.apache.kafka.common.security.scram.ScramLoginModule required username="marketdata" password="...";'
+# Check which hall holds the global lock
+oc --context hall1-cluster exec market-data-service-0 -- \
+  redis-cli -h $REDIS_HOST -a $REDIS_PASSWORD get marketdata:leader:lock
+# Expected: "hall1/market-data-service-0" or "hall2/market-data-service-0"
 ```
-
-Better — use **SealedSecrets** or **External Secrets Operator** in production so credentials are version-controlled encrypted.
-
-### 4. Deploy the workload
-
-```bash
-oc apply -f deploy/openshift/statefulset.yaml
-oc apply -f deploy/openshift/service.yaml
-oc apply -f deploy/openshift/pdb.yaml
-```
-
-### 5. Watch the rollout
-
-```bash
-oc rollout status statefulset/market-data-service
-# or:
-oc get pods -l app=market-data-service -w
-```
-
-You should see all 4 pods come up in parallel (the StatefulSet has `podManagementPolicy: Parallel`).
 
 ---
 
-## Verifying the deployment
-
-### Check leader election
+## Verification matrix
 
 ```bash
-for i in 0 1 2 3; do
-  echo "=== market-data-service-$i ==="
-  oc exec market-data-service-$i -- curl -s localhost:8080/actuator/health/leader
+for hall in hall1 hall2; do
+  for i in 0 1; do
+    role=$(oc --context $hall-cluster exec market-data-service-$i -- \
+           curl -s localhost:8080/actuator/health/leader 2>/dev/null \
+           | grep -oE '"state":"[^"]+"' | cut -d'"' -f4)
+    echo "$hall/market-data-service-$i: $role"
+  done
 done
 ```
 
-Expected:
+Expected steady state:
 
-| Pod | `state` | `isLeader` |
-|---|---|---|
-| `market-data-service-0` | `LEADER` *or* `WARM_STANDBY` | true *or* false |
-| `market-data-service-1` | `LEADER` *or* `WARM_STANDBY` | true *or* false |
-| `market-data-service-2` | `COLD_STANDBY` | false |
-| `market-data-service-3` | `COLD_STANDBY` | false |
+| Pod | Expected state |
+|---|---|
+| `hall1/market-data-service-0` | `LEADER` OR `WARM_STANDBY` |
+| `hall1/market-data-service-1` | `COLD_STANDBY` |
+| `hall2/market-data-service-0` | `WARM_STANDBY` OR `LEADER` |
+| `hall2/market-data-service-1` | `COLD_STANDBY` |
 
-Exactly one of pod-0 and pod-1 should be `LEADER`.
-
-### Check LSEG connection
+Exactly **one** pod should be `LEADER`; exactly **one** warm-eligible pod should be `WARM_STANDBY`.
 
 ```bash
-oc exec market-data-service-0 -- curl -s localhost:8080/actuator/health/lseg
-```
+# Check DACS sessions from EMA side
+oc --context hall1-cluster exec market-data-service-0 -- \
+  curl -s localhost:8080/actuator/prometheus | grep marketdata_subscriptions_active
+oc --context hall2-cluster exec market-data-service-0 -- \
+  curl -s localhost:8080/actuator/prometheus | grep marketdata_subscriptions_active
 
-Expected: `{"status":"UP","details":{"emaConnected":true,"podRole":"WARM_ELIGIBLE",...}}`
-
-### Stream metrics
-
-```bash
-oc exec market-data-service-0 -- curl -s localhost:8080/actuator/prometheus \
-  | grep marketdata_
+# Expected: leader pod shows N>0 (= number of subscribed RICs)
+#           warm pod shows 0 (open session, no subscriptions)
 ```
 
 ---
 
-## Failover test
+## Failover testing
+
+### Within-hall pod failover
 
 ```bash
-# Identify the current leader
-LEADER=$(for i in 0 1; do
-  STATE=$(oc exec market-data-service-$i -- curl -s localhost:8080/actuator/health/leader \
-          | grep -o '"state":"[^"]*"' | cut -d'"' -f4)
-  if [ "$STATE" = "LEADER" ]; then echo "market-data-service-$i"; fi
-done)
-echo "Current leader: $LEADER"
+# Identify the leader
+LEADER_POD=$(...)  # pod that has marketdata_leader=1
+LEADER_HALL=hall1  # or hall2
 
 # Kill it
-oc delete pod $LEADER
+oc --context ${LEADER_HALL}-cluster delete pod $LEADER_POD
 
-# Watch the other warm-eligible pod take over
-oc logs -f -l app=market-data-service --tail=20 | grep -E "(Promoted to leader|GAP_DETECTED)"
+# Within ~5–7s, another pod takes over. If the killed pod was in hall1 and the cross-hall
+# warm standby is in hall2, the lock goes to hall2/pod-0 (cross-hall promotion).
+# If the killed pod was warm-eligible, hall2/pod-0 (existing warm standby) becomes leader.
+
+oc --context hall2-cluster logs market-data-service-0 | grep -E "Promoted to leader"
 ```
 
-You should see:
-- Within ~5s: the other warm-eligible pod logs `State transition: WARM_STANDBY → LEADER`
-- Within ~7s: `Promoted to leader — resubscribing all active RICs`
-- Within ~7s: `GAP_DETECTED` events published to `market-data-control`
+### Cross-hall failover (full hall1 outage)
 
-The killed pod will be restarted by the StatefulSet and come up as the new `WARM_STANDBY`.
+This is the failure mode that justifies the 2-session investment. Simulate by scaling hall1 to zero:
+
+```bash
+oc --context hall1-cluster scale statefulset/market-data-service --replicas=0
+sleep 8
+oc --context hall2-cluster logs market-data-service-0 | grep -E "Promoted to leader|GAP_DETECTED"
+```
+
+Expected sequence in `hall2/market-data-service-0`'s logs:
+
+```
+State transition: WARM_STANDBY → LEADER (lock acquired)
+Promoted to leader — resubscribing all active RICs
+Published GAP_DETECTED ric=...  duration=5000ms+
+```
+
+Recover hall1:
+```bash
+oc --context hall1-cluster scale statefulset/market-data-service --replicas=2
+# hall1 pods come back as WARM_STANDBY / COLD_STANDBY — hall2 remains leader (no automatic fail-back)
+```
+
+### TREP LB endpoint failover (no application restart)
+
+The TREP LB exposes two IPs (`trep-lb-1`, `trep-lb-2`). If the LB drops one IP (because a backend ADS failed and the LB collapsed to a single backend), EMA `ChannelSet` reconnects to the remaining endpoint transparently — no new DACS session opens. To verify: ask your TREP admin to fail one of the LB endpoints and watch:
+- `marketdata_kafka_publish_failures_total` should stay at 0
+- Active subscription count gauge should not drop
+- A short tick gap (~2–5s) may appear
 
 ---
 
 ## Scaling
 
-### Add cold-standby capacity
+### Add cold-standby capacity (per hall)
 
-Edit the StatefulSet:
 ```bash
-oc scale statefulset/market-data-service --replicas=6
+oc --context hall1-cluster scale statefulset/market-data-service --replicas=3
 ```
 
-Then update the ConfigMap to assign roles for the new ordinals:
+Then update the hall ConfigMap:
 ```yaml
-data:
-  ...
-  market-data-service-4: "cold-only"
-  market-data-service-5: "cold-only"
-```
-
-```bash
-oc apply -f deploy/openshift/configmap.yaml
-oc rollout restart statefulset/market-data-service
+market-data-service-2: "cold-only"
 ```
 
 ### Promote a cold pod to warm
 
-Change the ConfigMap entry from `cold-only` to `warm-eligible`. The pod will open an EMA session on its next restart → **adds 1 LSEG login charge**.
+⚠ **Cost increase** — this opens an additional DACS session.
 
-> ⚠ Don't have 3+ warm-eligible pods in the same cluster — only one can be leader at a time, and the others are wasted login fees.
+Edit the ConfigMap:
+```yaml
+market-data-service-1: "warm-eligible"   # was "cold-only"
+```
+
+```bash
+oc --context hall1-cluster apply -f deploy/openshift/hall1/configmap.yaml
+oc --context hall1-cluster rollout restart statefulset/market-data-service
+```
+
+Confirm `MaxLogins` on your DACS user can accommodate the increase.
 
 ---
 
-## Routing inbound traffic
+## Routing inbound HTTP traffic
 
-The `Service` is `ClusterIP` by default — for external access add a Route:
+The Service is `ClusterIP` per hall. For external access add a Route per hall, or front with a global load-balancer that detects which hall holds the leader (use the `marketdata_leader` metric).
 
-```yaml
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: market-data-service
-spec:
-  to: { kind: Service, name: market-data-service }
-  port: { targetPort: http }
-  tls: { termination: edge }
-```
-
-> Note: the service is **stateless from the HTTP perspective** — any pod can serve `/actuator/health`, etc. — but business logic only happens on the leader. There's no need for client-side routing.
+> The HTTP endpoints (`/actuator/*`) are stateless — any pod can serve them. Business logic only happens on the leader. Most installations don't need to route based on leader; they query metrics directly.
 
 ---
 
 ## Common deployment issues
 
-### Pods in `CrashLoopBackOff`
+### `marketdata_leader = 0` on all pods
+
+**Cause:** Redis lock unreachable, or all warm-eligible pods are unhealthy.
 
 ```bash
-oc logs market-data-service-0 --previous --tail=60
+# Check Redis connectivity from each cluster
+oc --context hall1-cluster exec market-data-service-0 -- nc -zv $REDIS_HOST 6379
+oc --context hall2-cluster exec market-data-service-0 -- nc -zv $REDIS_HOST 6379
+
+# Check the lock state
+oc --context hall1-cluster exec market-data-service-0 -- \
+  redis-cli -h $REDIS_HOST -a $REDIS_PASSWORD get marketdata:leader:lock
 ```
 
-Likely causes:
-- Wrong DB credentials in Secret — check `oc describe secret market-data-service-db`
-- Postgres not reachable from the pod — `oc rsh market-data-service-0` then `nc -zv postgres-primary.db.svc 5432`
-- Flyway migration failure — usually means the schema already exists from a previous broken deploy. Run `oc exec market-data-service-0 -- flyway repair` (or delete + recreate the DB)
+### Two leaders simultaneously (split-brain)
 
-### All 4 pods think they're LEADER
+**Cause:** Network partition between halls + Redis active-active write conflict.
 
-The Redis connection is broken or the lock key is being flushed. Check:
-- `oc exec market-data-service-0 -- redis-cli -h $REDIS_HOST get marketdata:leader:lock`
-- Redis logs for evictions / restarts
-
-### `marketdata_subscriptions_active` is high but `_registry` is 0
-
-Refcounts in Redis are out of sync with PG. Usually means Redis was flushed/restarted. The leader will reconcile on next failover, but you can force it:
+- For Redis Enterprise CRDB: CRDT resolution should converge within seconds. Check for stuck conflict counters.
+- For Redis master-replica: a partition can promote both sides. Ensure quorum is required for writes (sentinel + odd number of sentinels).
 
 ```bash
-oc exec $LEADER -- redis-cli -h $REDIS_HOST DEL marketdata:ric:active
-oc delete pod $LEADER   # forces failover + resubscribe from PG
+# Force a single leader
+oc --context <minority-side>-cluster scale statefulset/market-data-service --replicas=0
 ```
 
-### Failover taking longer than 7s
+### DACS rejects login: "MaxLogins exceeded"
 
-Increase `marketdata.leader.heartbeat-seconds` for stability, or check:
-- Redis latency (`oc exec $POD -- redis-cli --latency -h $REDIS_HOST`)
-- JVM GC pauses (`marketdata_jvm_gc_pause_seconds`)
-- Network latency between pods and Redis
+**Cause:** Your user has too many residual sessions on ADS.
+
+```bash
+# Ask TREP admin
+adsadmin> show user marketdata-adapter
+adsadmin> kill session marketdata-adapter 10.10.1.100   # if a session is stuck
+```
+
+Increase `MaxLogins` to ≥ 3 to avoid recurrence.
+
+### `Connection refused` to ADS from one hall only
+
+**Cause:** Egress IP for that hall is not yet whitelisted at TREP.
+
+```bash
+# Check the egress IP the pod is using
+oc --context hall1-cluster exec market-data-service-0 -- curl -s ifconfig.io
+# Should match LSEG_DACS_POSITION
+```
+
+Send the actual observed egress IP to the TREP team for whitelisting.
 
 ---
 
 ## Rollback
 
 ```bash
-oc rollout undo statefulset/market-data-service
-# or to a specific revision:
-oc rollout history statefulset/market-data-service
-oc rollout undo statefulset/market-data-service --to-revision=3
+oc --context hall1-cluster rollout undo statefulset/market-data-service
+oc --context hall2-cluster rollout undo statefulset/market-data-service
 ```
 
-> The DB schema is migrated forward by Flyway. **Rollback the app but NOT the schema** — Flyway-managed migrations are not auto-reversed. If a schema change is incompatible, write a forward migration.
+> Do NOT rollback the DB schema — Flyway migrations are forward-only. Write a new migration if needed.

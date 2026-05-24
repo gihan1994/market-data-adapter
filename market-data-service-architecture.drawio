@@ -1,251 +1,195 @@
-<mxfile host="app.diagrams.net" pages="7">
-  <diagram name="1. System Architecture" id="FJ4nluEhVMC3OyeE7D2l">
-    <mxGraphModel dx="3089" dy="1782" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+<mxfile host="app.diagrams.net" pages="8">
+  <diagram name="1. System Architecture (dual-hall)" id="page_dual_hall">
+    <mxGraphModel dx="2460" dy="1244" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2000" pageHeight="1300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="bg_lseg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;verticalAlign=top;opacity=60;" value="&lt;b&gt;☁️  LSEG Real-Time Platform&lt;/b&gt;" vertex="1">
-          <mxGeometry height="130" width="720" x="400" y="-91" as="geometry" />
+        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" value="&lt;b&gt;Dual-Cluster Deployment — hall1 + hall2&lt;/b&gt;&#xa;4 pods (2 per hall). Shared TREP load balancer (HA pair). Shared Enterprise Redis. 1 DACS user × 2 concurrent sessions." vertex="1">
+          <mxGeometry height="50" width="1900" x="40" y="10" as="geometry" />
         </mxCell>
-        <mxCell id="lseg_auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;OAuth2 Token Endpoint&lt;/b&gt;" vertex="1">
-          <mxGeometry height="65" width="220" x="440" y="-51" as="geometry" />
+        <mxCell id="bg_trep" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;verticalAlign=top;opacity=60;" value="&lt;b&gt;🏛️  LSEG TREP / RTDS  (shared by both halls)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="200" width="720" x="640" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="lseg_stream" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;ERT / RTO Streaming&lt;/b&gt;&#xa;EMA / OMM Protocol" vertex="1">
-          <mxGeometry height="65" width="240" x="860" y="-51" as="geometry" />
+        <mxCell id="dacs_server" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;align=center;" value="&lt;b&gt;DACS Server&lt;/b&gt;&#xa;Authenticates LOGIN&#xa;(username + position + appId)&#xa;Enforces MaxLogins/user" vertex="1">
+          <mxGeometry height="130" width="200" x="670" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="bg_openshift" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;verticalAlign=top;opacity=40;" value="&lt;b&gt;🔴  OpenShift Cluster — market-data-service&lt;/b&gt;" vertex="1">
-          <mxGeometry height="470" width="1180" x="10" y="179" as="geometry" />
+        <mxCell id="lb_pair" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;align=center;verticalAlign=top;" value="&lt;b&gt;Load Balancer (HA pair)&lt;/b&gt;&#xa;Routes to backend ADS-1 / ADS-2&#xa;May collapse to single IP if backend fails" vertex="1">
+          <mxGeometry height="150" width="430" x="900" y="110" as="geometry" />
         </mxCell>
-        <mxCell id="bg_pod1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 1 — 🟢 ACTIVE LEADER&lt;/b&gt;" vertex="1">
-          <mxGeometry height="420" width="270" x="25" y="215" as="geometry" />
+        <mxCell id="lb_ip1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="&lt;b&gt;LB endpoint #1&lt;/b&gt;  trep-lb-1.trep.local : 14002" vertex="1">
+          <mxGeometry height="38" width="390" x="920" y="160" as="geometry" />
         </mxCell>
-        <mxCell id="p1_omm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="OmmConsumer&#xa;&lt;b&gt;SUBSCRIBED to all RICs&lt;/b&gt;" vertex="1">
-          <mxGeometry height="42" width="240" x="40" y="255" as="geometry" />
+        <mxCell id="lb_ip2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="&lt;b&gt;LB endpoint #2&lt;/b&gt;  trep-lb-2.trep.local : 14002" vertex="1">
+          <mxGeometry height="38" width="390" x="920" y="208" as="geometry" />
         </mxCell>
-        <mxCell id="p1_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Leader Election Service" vertex="1">
-          <mxGeometry height="38" width="240" x="40" y="562" as="geometry" />
+        <mxCell id="bg_hall1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;verticalAlign=top;opacity=40;" value="&lt;b&gt;🔵  Hall 1 — OpenShift Cluster&lt;/b&gt;&#xa;namespace egress IP: &lt;b&gt;10.10.1.100&lt;/b&gt; (whitelisted in DACS)" vertex="1">
+          <mxGeometry height="400" width="940" x="30" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="p1_sm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Subscription Manager" vertex="1">
-          <mxGeometry height="38" width="240" x="40" y="345" as="geometry" />
+        <mxCell id="bg_h1p0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;verticalAlign=top;" value="&lt;b&gt;hall1 / market-data-service-0&lt;/b&gt;&#xa;🟢 ACTIVE LEADER (warm-eligible)" vertex="1">
+          <mxGeometry height="330" width="440" x="50" y="370" as="geometry" />
         </mxCell>
-        <mxCell id="p1_srl" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Subscription Request Listener" vertex="1">
-          <mxGeometry height="38" width="240" x="40" y="473" as="geometry" />
+        <mxCell id="h1p0_omm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="OmmConsumer  ▸  &lt;b&gt;DACS session #1 — SUBSCRIBED&lt;/b&gt;" vertex="1">
+          <mxGeometry height="42" width="410" x="65" y="420" as="geometry" />
         </mxCell>
-        <mxCell id="p1_kp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Kafka Producer Service" vertex="1">
-          <mxGeometry height="38" width="240" x="40" y="431" as="geometry" />
+        <mxCell id="h1p0_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Leader Election  (holds Redis lock)" vertex="1">
+          <mxGeometry height="38" width="410" x="65" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="p1_rec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Recovery Service" vertex="1">
-          <mxGeometry height="38" width="240" x="40" y="387" as="geometry" />
+        <mxCell id="h1p0_sm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Subscription Manager  (active)" vertex="1">
+          <mxGeometry height="38" width="410" x="65" y="515" as="geometry" />
         </mxCell>
-        <mxCell id="p1_auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="LSEG Auth Service (OAuth2)" vertex="1">
-          <mxGeometry height="38" width="240" x="40" y="517" as="geometry" />
+        <mxCell id="h1p0_kreq" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Kafka Request Listener  (running — consumes requests)" vertex="1">
+          <mxGeometry height="38" width="410" x="65" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="bg_pod2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 2 — 🟡 WARM STANDBY&lt;/b&gt;" vertex="1">
-          <mxGeometry height="420" width="270" x="310" y="215" as="geometry" />
+        <mxCell id="h1p0_kp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="Kafka Producer  (publishes ticks)" vertex="1">
+          <mxGeometry height="38" width="410" x="65" y="605" as="geometry" />
         </mxCell>
-        <mxCell id="p2_omm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="OmmConsumer&#xa;&lt;b&gt;LOGGED-IN, NO SUBSCRIPTIONS&lt;/b&gt;" vertex="1">
-          <mxGeometry height="42" width="240" x="325" y="255" as="geometry" />
+        <mxCell id="bg_h1p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;verticalAlign=top;" value="&lt;b&gt;hall1 / market-data-service-1&lt;/b&gt;&#xa;⚪ COLD STANDBY (cold-only)" vertex="1">
+          <mxGeometry height="330" width="440" x="510" y="370" as="geometry" />
         </mxCell>
-        <mxCell id="p2_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Leader Election Service" vertex="1">
-          <mxGeometry height="38" width="240" x="325" y="565" as="geometry" />
+        <mxCell id="h1p1_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Leader Election  (watching lock)" vertex="1">
+          <mxGeometry height="38" width="410" x="525" y="420" as="geometry" />
         </mxCell>
-        <mxCell id="p2_sm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Subscription Manager&#xa;(preloaded list, idle)" vertex="1">
-          <mxGeometry height="38" width="240" x="325" y="345" as="geometry" />
+        <mxCell id="h1p1_idle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;" value="&lt;i&gt;No DACS session, no subscriptions&lt;/i&gt;&#xa;(opens lazily if promoted)" vertex="1">
+          <mxGeometry height="60" width="410" x="525" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="p2_srl" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Subscription Request Listener (idle)" vertex="1">
-          <mxGeometry height="38" width="240" x="325" y="474" as="geometry" />
+        <mxCell id="bg_hall2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;verticalAlign=top;opacity=40;" value="&lt;b&gt;🟣  Hall 2 — OpenShift Cluster&lt;/b&gt;&#xa;namespace egress IP: &lt;b&gt;10.10.2.100&lt;/b&gt; (whitelisted in DACS)" vertex="1">
+          <mxGeometry height="400" width="940" x="1000" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="p2_kp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Kafka Producer Service (idle)" vertex="1">
-          <mxGeometry height="38" width="240" x="325" y="431" as="geometry" />
+        <mxCell id="bg_h2p0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;verticalAlign=top;" value="&lt;b&gt;hall2 / market-data-service-0&lt;/b&gt;&#xa;🟡 WARM STANDBY (warm-eligible)" vertex="1">
+          <mxGeometry height="330" width="440" x="1020" y="370" as="geometry" />
         </mxCell>
-        <mxCell id="p2_rec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Recovery Service (ready)" vertex="1">
-          <mxGeometry height="38" width="240" x="325" y="389" as="geometry" />
+        <mxCell id="h2p0_omm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="OmmConsumer  ▸  &lt;b&gt;DACS session #2 — IDLE (no subs)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="42" width="410" x="1035" y="420" as="geometry" />
         </mxCell>
-        <mxCell id="p2_auth" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="LSEG Auth Service (token watcher)" vertex="1">
-          <mxGeometry height="38" width="240" x="325" y="517" as="geometry" />
+        <mxCell id="h2p0_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Leader Election  (watching lock)" vertex="1">
+          <mxGeometry height="38" width="410" x="1035" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="bg_pod3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 3 — ⚪ COLD STANDBY&lt;/b&gt;" vertex="1">
-          <mxGeometry height="180" width="270" x="595" y="215" as="geometry" />
+        <mxCell id="h2p0_sm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Subscription Manager  (preloaded, idle)" vertex="1">
+          <mxGeometry height="38" width="410" x="1035" y="515" as="geometry" />
         </mxCell>
-        <mxCell id="p3_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Leader Election Service" vertex="1">
-          <mxGeometry height="38" width="240" x="610" y="341" as="geometry" />
+        <mxCell id="h2p0_kreq" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="Kafka Request Listener  (stopped)" vertex="1">
+          <mxGeometry height="38" width="410" x="1035" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="p3_hc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;" value="Health Check (no LSEG conn)" vertex="1">
-          <mxGeometry height="38" width="240" x="610" y="257" as="geometry" />
+        <mxCell id="h2p0_rec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Recovery Service  (ready for promotion)" vertex="1">
+          <mxGeometry height="38" width="410" x="1035" y="605" as="geometry" />
         </mxCell>
-        <mxCell id="bg_pod4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;verticalAlign=top;" value="&lt;b&gt;Pod 4 — ⚪ COLD STANDBY&lt;/b&gt;" vertex="1">
-          <mxGeometry height="180" width="270" x="880" y="215" as="geometry" />
+        <mxCell id="bg_h2p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;verticalAlign=top;" value="&lt;b&gt;hall2 / market-data-service-1&lt;/b&gt;&#xa;⚪ COLD STANDBY (cold-only)" vertex="1">
+          <mxGeometry height="330" width="440" x="1480" y="370" as="geometry" />
         </mxCell>
-        <mxCell id="p4_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Leader Election Service" vertex="1">
-          <mxGeometry height="38" width="240" x="895" y="343" as="geometry" />
+        <mxCell id="h2p1_le" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Leader Election  (watching lock)" vertex="1">
+          <mxGeometry height="38" width="410" x="1495" y="420" as="geometry" />
         </mxCell>
-        <mxCell id="p4_hc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;" value="Health Check (no LSEG conn)" vertex="1">
-          <mxGeometry height="38" width="240" x="895" y="258" as="geometry" />
+        <mxCell id="h2p1_idle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;" value="&lt;i&gt;No DACS session, no subscriptions&lt;/i&gt;" vertex="1">
+          <mxGeometry height="38" width="410" x="1495" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;fontSize=10;align=left;spacingLeft=8;verticalAlign=middle;" value="&lt;b&gt;Legend&lt;/b&gt;&#xa;━━  Live data flow&#xa;┄┄  Control / recovery flow&#xa;🟢  Active leader — subscribed&#xa;🟡  Warm standby — logged-in (2nd login)&#xa;⚪  Cold standby — no LSEG session" vertex="1">
-          <mxGeometry height="120" width="280" x="1200" y="195" as="geometry" />
+        <mxCell id="redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;verticalAlign=top;align=left;spacingLeft=10;" value="&lt;b&gt;🔴  Enterprise Redis&lt;/b&gt;&#xa;(active-active across halls)&#xa;&#xa;leader:lock = &quot;hall1/market-data-service-0&quot;&#xa;ric:active, ric:price:*, ric:last-published:*&#xa;subscription:refcount:*" vertex="1">
+          <mxGeometry height="220" width="420" x="40" y="780" as="geometry" />
         </mxCell>
-        <mxCell id="billing_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=8;verticalAlign=middle;" value="&lt;b&gt;💰 Billing Model&lt;/b&gt;&#xa;2 EMA logins = 2 charges&#xa;(active + warm)&#xa;Pod 3, 4 = no LSEG session = no charge" vertex="1">
-          <mxGeometry height="80" width="280" x="1200" y="325" as="geometry" />
+        <mxCell id="pg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;verticalAlign=top;align=left;spacingLeft=10;" value="&lt;b&gt;🐘  PostgreSQL&lt;/b&gt;&#xa;(cross-hall HA)&#xa;&#xa;ric_registry&#xa;subscription_requests&#xa;market_data_gaps&#xa;subscription_audit" vertex="1">
+          <mxGeometry height="220" width="370" x="490" y="780" as="geometry" />
         </mxCell>
-        <mxCell id="failover_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=8;verticalAlign=middle;" value="&lt;b&gt;⚡ Failover (Warm Standby)&lt;/b&gt;&#xa;t = 0s    Pod 1 crashes&#xa;t = 5s    Redis lock TTL expires&#xa;t = 5s    Pod 2 wins election&#xa;t = 5s    Pod 2 already has EMA session&#xa;t = 6s    Pod 2 sends ReqMsg for all RICs&#xa;t = 7s    LSEG sends snapshots&#xa;t = 7s    Pod 2 publishes to Kafka&#xa;&#xa;&lt;b&gt;Downtime: ~5-7 seconds&lt;/b&gt;" vertex="1">
-          <mxGeometry height="190" width="280" x="1200" y="415" as="geometry" />
+        <mxCell id="kafka" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;verticalAlign=top;align=left;spacingLeft=10;" value="&lt;b&gt;⚡  Kafka (multi-DC)&lt;/b&gt;&#xa;&#xa;market-data-requests   (LCM MS → adapter)&#xa;market-data-updates    (adapter → LCM MS)&#xa;market-data-control    (gap + recovery events)" vertex="1">
+          <mxGeometry height="220" width="480" x="890" y="780" as="geometry" />
         </mxCell>
-        <mxCell id="bg_redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;verticalAlign=top;opacity=70;" value="&lt;b&gt;🔴  Redis Cluster&lt;/b&gt;" vertex="1">
-          <mxGeometry height="350" width="420" x="517" y="680" as="geometry" />
+        <mxCell id="lcm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;verticalAlign=top;align=left;spacingLeft=10;" value="&lt;b&gt;📡  LCM MS&lt;/b&gt;&#xa;(business consumer)&#xa;&#xa;Sends:    subscribe / unsubscribe requests&#xa;Receives: live ticks + gap events" vertex="1">
+          <mxGeometry height="220" width="540" x="1400" y="780" as="geometry" />
         </mxCell>
-        <mxCell id="r_lock" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="🔒  &lt;b&gt;leader:lock&lt;/b&gt;  —  Redisson lock, TTL 5s, hb 2s" vertex="1">
-          <mxGeometry height="38" width="395" x="529" y="720" as="geometry" />
+        <mxCell id="billing" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;" value="&lt;b&gt;💰 DACS billing&lt;/b&gt;&#xa;Per-DACS-user — 1 named user license.&#xa;ALL pods log in with the same DACS username.&#xa;Active concurrent sessions: &lt;b&gt;2&lt;/b&gt; (active + warm).&#xa;Set DACS MaxLogins ≥ 3 (allows overlap during failover)." vertex="1">
+          <mxGeometry height="160" width="620" x="40" y="1030" as="geometry" />
         </mxCell>
-        <mxCell id="r_rics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="📋  &lt;b&gt;ric:active&lt;/b&gt;  —  Sorted Set of subscribed RICs" vertex="1">
-          <mxGeometry height="38" width="395" x="529" y="765" as="geometry" />
+        <mxCell id="failover_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;" value="&lt;b&gt;⚡ Failover timing&lt;/b&gt;&#xa;&lt;b&gt;TREP-LB backend failover (LB drops one IP):&lt;/b&gt; transparent to clients via EMA ChannelSet; same DACS session.&#xa;&lt;b&gt;Within-hall pod failure (warm → cold):&lt;/b&gt; ~10–15s; cold pod opens new DACS session.&#xa;&lt;b&gt;Cross-hall failover (hall1 → hall2):&lt;/b&gt; ~5–7s; hall2 warm pod already has DACS session #2 — sends batch ReqMsg." vertex="1">
+          <mxGeometry height="160" width="660" x="680" y="1030" as="geometry" />
         </mxCell>
-        <mxCell id="r_price" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="💹  &lt;b&gt;ric:price:{sym}&lt;/b&gt;  —  Latest tick cache" vertex="1">
-          <mxGeometry height="38" width="395" x="529" y="810" as="geometry" />
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;" value="&lt;b&gt;Legend&lt;/b&gt;&#xa;━━ thick green   Active DACS session #1 (subscribed)&#xa;━━ thick orange  Warm DACS session #2 (idle, no subs)&#xa;┄┄ dashed        Leader-lock watch&#xa;━━ solid         Leader-lock acquire + heartbeat&#xa;━━ purple        Kafka tick / control flow&#xa;🟢 active leader   🟡 warm standby   ⚪ cold standby" vertex="1">
+          <mxGeometry height="160" width="580" x="1360" y="1030" as="geometry" />
         </mxCell>
-        <mxCell id="r_token" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="🔑  &lt;b&gt;lseg:auth:token&lt;/b&gt;  —  shared by Pod 1 + Pod 2" vertex="1">
-          <mxGeometry height="38" width="395" x="529" y="855" as="geometry" />
-        </mxCell>
-        <mxCell id="r_gap" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="⏱  &lt;b&gt;ric:last-published:{sym}&lt;/b&gt;  —  Gap timestamp" vertex="1">
-          <mxGeometry height="38" width="395" x="529" y="900" as="geometry" />
-        </mxCell>
-        <mxCell id="r_refcount" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="🔢  &lt;b&gt;subscription:refcount:{ric}&lt;/b&gt;  —  Active subscribers" vertex="1">
-          <mxGeometry height="38" width="395" x="529" y="945" as="geometry" />
-        </mxCell>
-        <mxCell id="bg_pg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;verticalAlign=top;opacity=70;" value="&lt;b&gt;🐘  PostgreSQL&lt;/b&gt;" vertex="1">
-          <mxGeometry height="350" width="290" x="-482" y="225" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_ric" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;ric_registry&lt;/b&gt;" vertex="1">
-          <mxGeometry height="38" width="265" x="-469" y="265" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_reqs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;subscription_requests&lt;/b&gt;&#xa;(business_ms, ric, requested_at)" vertex="1">
-          <mxGeometry height="42" width="265" x="-469" y="310" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_gaps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;market_data_gaps&lt;/b&gt;" vertex="1">
-          <mxGeometry height="38" width="265" x="-469" y="360" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_audit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" value="📄  &lt;b&gt;subscription_audit&lt;/b&gt;" vertex="1">
-          <mxGeometry height="38" width="265" x="-469" y="405" as="geometry" />
-        </mxCell>
-        <mxCell id="bg_kafka" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13;verticalAlign=top;opacity=70;" value="&lt;b&gt;⚡  Apache Kafka&lt;/b&gt;" vertex="1">
-          <mxGeometry height="350" width="400" x="436" y="1100" as="geometry" />
-        </mxCell>
-        <mxCell id="k_reqs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" value="&lt;b&gt;market-data-requests&lt;/b&gt;&#xa;business MS → adapter (subscribe / unsubscribe)" vertex="1">
-          <mxGeometry height="55" width="375" x="449" y="1140" as="geometry" />
-        </mxCell>
-        <mxCell id="k_updates" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" value="&lt;b&gt;market-data-updates&lt;/b&gt;&#xa;adapter → business MS (live ticks)" vertex="1">
-          <mxGeometry height="55" width="375" x="449" y="1205" as="geometry" />
-        </mxCell>
-        <mxCell id="k_control" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" value="&lt;b&gt;market-data-control&lt;/b&gt;&#xa;adapter → business MS (gap events)" vertex="1">
-          <mxGeometry height="55" width="375" x="449" y="1270" as="geometry" />
-        </mxCell>
-        <mxCell id="bg_consumers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;verticalAlign=top;opacity=70;" value="&lt;b&gt;📡  Business Microservices&lt;/b&gt;&#xa;(subscribe + consume)" vertex="1">
-          <mxGeometry height="350" width="268" x="1206" y="665" as="geometry" />
-        </mxCell>
-        <mxCell id="c_trading" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;LCM MS&lt;/b&gt;" vertex="1">
-          <mxGeometry height="55" width="215" x="1220" y="779" as="geometry" />
-        </mxCell>
-        <mxCell id="e_lseg_p1" edge="1" parent="1" source="lseg_stream" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=1;endFill=1;strokeColor=#82b366;strokeWidth=3;fontSize=10;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" target="p1_omm" value="&lt;b&gt;EMA Login #1&lt;/b&gt;&#xa;subscribed">
-          <mxGeometry relative="1" as="geometry">
+        <mxCell id="e_lb1_h1p0" edge="1" parent="1" source="lb_ip1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=1;endFill=1;strokeColor=#82b366;strokeWidth=3;fontSize=10;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" target="h1p0_omm" value="&lt;b&gt;DACS session #1&lt;/b&gt;&#xa;username=marketdata-adapter&#xa;position=10.10.1.100&#xa;ChannelSet(lb-1, lb-2)">
+          <mxGeometry relative="1" x="0.3625" y="2" as="geometry">
+            <mxPoint as="offset" />
             <Array as="points">
-              <mxPoint x="920" y="92" />
-              <mxPoint x="160" y="92" />
+              <mxPoint x="882" y="179" />
+              <mxPoint x="882" y="276" />
+              <mxPoint x="270" y="276" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="e_lseg_p2" edge="1" parent="1" source="lseg_stream" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=1;endFill=1;strokeColor=#d6b656;strokeWidth=3;fontSize=10;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" target="p2_omm" value="&lt;b&gt;EMA Login #2&lt;/b&gt;&#xa;logged-in, no sub">
+        <mxCell id="e_lb2_h2p0" edge="1" parent="1" source="lb_ip2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=1;endFill=1;strokeColor=#d79b00;strokeWidth=3;fontSize=10;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="h2p0_omm" value="&lt;b&gt;DACS session #2 (warm)&lt;/b&gt;&#xa;username=marketdata-adapter&#xa;position=10.10.2.100&#xa;ChannelSet(lb-1, lb-2)">
+          <mxGeometry relative="1" x="-0.3434" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1410" y="227" />
+              <mxPoint x="1410" y="395" />
+              <mxPoint x="1240" y="395" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h1p0_redis" edge="1" parent="1" source="h1p0_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#82b366;strokeWidth=2;fontSize=9;exitX=0;exitY=0.5;entryX=0.15;entryY=0;" target="redis" value="acquire + hb 2s">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="489" />
+              <mxPoint x="20" y="740" />
+              <mxPoint x="103" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h1p1_redis" edge="1" parent="1" source="h1p1_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#666666;dashed=1;fontSize=9;exitX=0;exitY=0.5;entryX=0.4;entryY=0;" target="redis" value="watch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="439" />
+              <mxPoint x="500" y="750" />
+              <mxPoint x="208" y="750" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h2p0_redis" edge="1" parent="1" source="h2p0_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#d6b656;dashed=1;fontSize=9;exitX=0;exitY=0.5;entryX=0.65;entryY=0;" target="redis" value="watch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="990" y="489" />
+              <mxPoint x="990" y="760" />
+              <mxPoint x="313" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h2p1_redis" edge="1" parent="1" source="h2p1_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#666666;dashed=1;fontSize=9;exitX=0;exitY=0.5;entryX=0.85;entryY=0;" target="redis" value="watch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1470" y="439" />
+              <mxPoint x="1470" y="770" />
+              <mxPoint x="397" y="770" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h1p0_pg" edge="1" parent="1" source="h1p0_sm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;exitX=1;exitY=0.5;entryX=0.2;entryY=0;" target="pg" value="persist RICs + audit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="565" y="534" />
+              <mxPoint x="565" y="730" />
+              <mxPoint x="564" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h1p0_kafka_req" edge="1" parent="1" source="h1p0_kreq" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#d79b00;strokeWidth=2;fontSize=9;exitX=1;exitY=0.5;entryX=0.3;entryY=0;" target="kafka" value="consume subscribe req">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="579" />
+              <mxPoint x="940" y="720" />
+              <mxPoint x="1034" y="720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h1p0_kafka_pub" edge="1" parent="1" source="h1p0_kp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#d79b00;strokeWidth=2;fontSize=9;exitX=1;exitY=0.5;entryX=0.7;entryY=0;" target="kafka" value="publish ticks + gap events">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="624" />
+              <mxPoint x="960" y="745" />
+              <mxPoint x="1226" y="745" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_kafka_lcm_out" edge="1" parent="1" source="kafka" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673a6;strokeWidth=2;fontSize=9;exitX=1;exitY=0.4;entryX=0;entryY=0.3;" target="lcm" value="ticks + control">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_auth_token" edge="1" parent="1" source="lseg_auth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;strokeColor=#6c8ebf;fontStyle=2;fontSize=9;exitX=0;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r_token" value="stores token">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="-100" y="-18" />
-              <mxPoint x="-100" y="874" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_p1le_lock" edge="1" parent="1" source="p1_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#82b366;strokeWidth=2;fontSize=9;fontStyle=1;exitX=0.5;exitY=1;entryX=0.1;entryY=0;" target="r_lock" value="acquire + hb 2s">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_p2le_lock" edge="1" parent="1" source="p2_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#d6b656;dashed=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.3;entryY=0;" target="r_lock" value="watch">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="445" y="644" />
-              <mxPoint x="648" y="644" />
-            </Array>
-          </mxGeometry>
-          <Array as="points">
-            <mxPoint x="445" y="660" />
-            <mxPoint x="140" y="660" />
-          </Array>
-        </mxCell>
-        <mxCell id="e_p3le_lock" edge="1" parent="1" source="p3_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#666666;dashed=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="r_lock" value="watch">
-          <mxGeometry relative="1" as="geometry" />
-          <Array as="points">
-            <mxPoint x="730" y="670" />
-            <mxPoint x="240" y="670" />
-          </Array>
-        </mxCell>
-        <mxCell id="e_p4le_lock" edge="1" parent="1" source="p4_le" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;strokeColor=#666666;dashed=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.8;entryY=0;" target="r_lock" value="watch">
-          <mxGeometry relative="1" as="geometry" />
-          <Array as="points">
-            <mxPoint x="1015" y="680" />
-            <mxPoint x="340" y="680" />
-          </Array>
-        </mxCell>
-        <mxCell id="e_sm_pgric" edge="1" parent="1" source="p1_sm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6c8ebf;fontSize=9;exitX=0;exitY=0.5;entryX=1;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="pg_ric" value="persist RIC">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="-167" y="364" />
-              <mxPoint x="-167" y="284" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_sm_rrics" edge="1" parent="1" source="p1_sm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d6b656;fontSize=9;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="r_rics" value="register">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="303" y="364" />
-              <mxPoint x="303" y="784" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_kreqs_srl" edge="1" parent="1" source="k_reqs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d79b00;strokeWidth=2;fontStyle=1;fontSize=9;exitX=0;exitY=0.3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="p1_srl" value="consume sub request">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="-13" y="1156" />
-              <mxPoint x="-13" y="492" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_kp_kupd" edge="1" parent="1" source="p1_kp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d79b00;strokeWidth=2;fontStyle=1;fontSize=9;exitX=0;exitY=0.5;entryX=0;entryY=0.3;exitDx=0;exitDy=0;" target="k_updates" value="publish tick">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="-39" y="450" />
-              <mxPoint x="-39" y="1222" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_rec_kctrl" edge="1" parent="1" source="p1_rec" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#d79b00;dashed=1;fontSize=9;exitX=0;exitY=0.5;entryX=0;entryY=0.3;exitDx=0;exitDy=0;" target="k_control" value="gap event">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="40" y="402" />
-              <mxPoint x="-69" y="402" />
-              <mxPoint x="-69" y="1286" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_trading_kreqs" edge="1" parent="1" source="c_trading" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673a6;strokeWidth=2;fontSize=9;exitX=0.5;exitY=0;entryX=1;entryY=0.3;exitDx=0;exitDy=0;" target="k_reqs" value="subscribe / unsub">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_kupd_trading" edge="1" parent="1" source="k_updates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673a6;strokeWidth=2;fontSize=9;exitX=1;exitY=0.4;entryX=0;entryY=0.5;" target="c_trading" value="ticks">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1152" y="1227" />
-              <mxPoint x="1152" y="807" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_kctrl_trading" edge="1" parent="1" source="k_control" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673a6;dashed=1;exitX=1;exitY=0.3;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="c_trading" value="">
+        <mxCell id="e_lcm_kafka_in" edge="1" parent="1" source="lcm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673a6;strokeWidth=2;fontSize=9;exitX=0;exitY=0.7;entryX=1;entryY=0.6;" target="kafka" value="subscribe / unsubscribe">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
@@ -1160,6 +1104,200 @@
         </mxCell>
         <mxCell id="w7_legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;fontSize=10;align=left;spacingLeft=10;verticalAlign=middle;" value="&lt;b&gt;Role config (env var POD_ROLE)&lt;/b&gt;&#xa;&#xa;•  &lt;b&gt;warm-eligible&lt;/b&gt; — pod will hold an open LSEG session when not leader. &lt;br/&gt;   StatefulSet ordinal 0 and 1.&#xa;•  &lt;b&gt;cold-only&lt;/b&gt; — pod never opens LSEG session unless promoted to leader. &lt;br/&gt;   StatefulSet ordinal 2 and 3.&#xa;&#xa;&lt;b&gt;Why this design?&lt;/b&gt;&#xa;Limits LSEG login charges to exactly 2 (1 active + 1 warm).&#xa;Cold pods cost nothing but give horizontal capacity for future scale-out.&#xa;&#xa;&lt;b&gt;Lock TTL tuning&lt;/b&gt; — 5s TTL with 2s heartbeat gives ~5–7s failover.&#xa;Tighten to 3s/1s for ~3–4s failover, at risk of false failover on GC pause." vertex="1">
           <mxGeometry height="380" width="380" x="1080" y="700" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="8. Cross-Hall Failover Sequence" id="page_cross_hall_failover">
+    <mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="7" pageScale="1" pageWidth="1900" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="&lt;b&gt;Cross-Hall Failover Sequence&lt;/b&gt;&#xa;Hall 1 catastrophic failure (DC outage / network partition) → Hall 2 warm standby takes over as global leader. ~5–7s downtime." style="text;html=1;align=left;verticalAlign=middle;fontSize=14;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="10" width="1800" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_h1_leader" value="&lt;b&gt;hall1/pod-0&lt;/b&gt;&#xa;(LEADER, dying)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_ads_h1" value="&lt;b&gt;ADS — Hall 1&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_redis" value="&lt;b&gt;Enterprise Redis&lt;/b&gt;&#xa;(cross-hall)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="520" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_h2_warm" value="&lt;b&gt;hall2/pod-0&lt;/b&gt;&#xa;(WARM STANDBY)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="750" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_ads_h2" value="&lt;b&gt;ADS — Hall 2&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="980" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_pg" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&#xa;ric_registry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_kctrl" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-control" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_kupd" value="&lt;b&gt;Kafka&lt;/b&gt;&#xa;market-data-updates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1670" y="80" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_h1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="140" y="135" as="sourcePoint" />
+            <mxPoint x="140" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_ads1" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="370" y="135" as="sourcePoint" />
+            <mxPoint x="370" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_redis" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="600" y="135" as="sourcePoint" />
+            <mxPoint x="600" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_h2" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="135" as="sourcePoint" />
+            <mxPoint x="830" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_ads2" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="1060" y="135" as="sourcePoint" />
+            <mxPoint x="1060" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_pg" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="1290" y="135" as="sourcePoint" />
+            <mxPoint x="1290" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_kctrl" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="1520" y="135" as="sourcePoint" />
+            <mxPoint x="1520" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll_kupd" style="endArrow=none;dashed=1;dashPattern=4 4;strokeColor=#d79b00;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="1750" y="135" as="sourcePoint" />
+            <mxPoint x="1750" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" value="&lt;b&gt;1.&lt;/b&gt; renew leader:lock value=&quot;hall1/market-data-service-0&quot; (every 2s)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="140" y="175" as="sourcePoint" />
+            <mxPoint x="600" y="175" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" value="&lt;b&gt;2.&lt;/b&gt; live ticks: UpdateMsg" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;dashed=1;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="370" y="215" as="sourcePoint" />
+            <mxPoint x="140" y="215" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" value="&lt;b&gt;3.&lt;/b&gt; publish ticks to Kafka" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="140" y="255" as="sourcePoint" />
+            <mxPoint x="1750" y="255" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="disaster" value="&lt;b&gt;💥 t = 0s — Hall 1 catastrophic outage&lt;/b&gt;&#xa;DC power failure / WAN partition / OpenShift cluster down.&#xa;hall1/pod-0 process terminates abruptly; TCP to ADS-Hall1 resets.&#xa;Cross-hall network blocks: hall1 pods unreachable from hall2." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;verticalAlign=middle;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="295" width="1800" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="m4" value="&lt;b&gt;4.&lt;/b&gt; ❌ heartbeat STOPS (hall1/pod-0 dead, redis unreachable from hall1 too)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#b85450;dashed=1;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="140" y="395" as="sourcePoint" />
+            <mxPoint x="600" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wait_band" value="&lt;b&gt;⏱ t = 0–5s&lt;/b&gt;  Enterprise Redis lock TTL counts down (5s). Hall2 pods are spinning, attempting SETNX every heartbeat tick (2s)." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="425" width="1800" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="m5" value="&lt;b&gt;5.&lt;/b&gt; t=5s — leader:lock TTL expires (key auto-deleted by Redis)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#b85450;fontStyle=1;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="600" y="475" as="sourcePoint" />
+            <mxPoint x="700" y="475" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" value="&lt;b&gt;6.&lt;/b&gt; SETNX leader:lock &quot;hall2/market-data-service-0&quot; EX 5  →  OK (won election)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="510" as="sourcePoint" />
+            <mxPoint x="600" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" value="&lt;b&gt;7.&lt;/b&gt; PromotedToLeaderEvent fires in Spring context (cross-hall promotion!)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;fontStyle=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="545" as="sourcePoint" />
+            <mxPoint x="940" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="note_warm" value="&lt;b&gt;⚡ Key point: hall2/pod-0 already has an open DACS session #2 to ADS-Hall2. No new DACS login needed — just send ReqMsg.&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;verticalAlign=middle;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="585" width="1800" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="m8" value="&lt;b&gt;8.&lt;/b&gt; SELECT ric FROM ric_registry WHERE active=true" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="645" as="sourcePoint" />
+            <mxPoint x="1290" y="645" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" value="&lt;b&gt;9.&lt;/b&gt; [EUR=, GBP=, USDJPY=, ...]  (all RICs)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;dashed=1;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="1290" y="685" as="sourcePoint" />
+            <mxPoint x="830" y="685" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m10" value="&lt;b&gt;10.&lt;/b&gt; batch ReqMsg for all RICs via existing OmmConsumer (DACS session #2)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="725" as="sourcePoint" />
+            <mxPoint x="1060" y="725" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m11" value="&lt;b&gt;11.&lt;/b&gt; RefreshMsg snapshots for each RIC (current bid/ask)" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;dashed=1;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="1060" y="765" as="sourcePoint" />
+            <mxPoint x="830" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m12" value="&lt;b&gt;12.&lt;/b&gt; for each RIC: GET ric:last-published:{ric}  →  compute gap window" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d6b656;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="805" as="sourcePoint" />
+            <mxPoint x="600" y="805" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m13" value="&lt;b&gt;13.&lt;/b&gt; publish GAP_DETECTED { ric, gap_start, gap_end, new_leader:&quot;hall2/pod-0&quot;, cross_hall_failover:true }" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="845" as="sourcePoint" />
+            <mxPoint x="1520" y="845" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m14" value="&lt;b&gt;14.&lt;/b&gt; publish snapshot tick per RIC → market-data-updates" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="885" as="sourcePoint" />
+            <mxPoint x="1750" y="885" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="recovered" value="&lt;b&gt;✅ t ≈ 5–7s — hall2/pod-0 is now the global leader. Hall1 is offline but the system is recovered.&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;verticalAlign=middle;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="925" width="1800" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="m15" value="&lt;b&gt;15.&lt;/b&gt; ongoing: live UpdateMsg from ADS-Hall2" style="endArrow=classic;html=1;fontSize=10;strokeColor=#6c8ebf;dashed=1;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="1060" y="985" as="sourcePoint" />
+            <mxPoint x="830" y="985" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m16" value="&lt;b&gt;16.&lt;/b&gt; ongoing: hall2/pod-0 publishes ticks; renews lock; hall1/pod-1 remains down" style="endArrow=classic;html=1;fontSize=10;strokeColor=#d79b00;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry as="geometry">
+            <mxPoint x="830" y="1025" as="sourcePoint" />
+            <mxPoint x="1750" y="1025" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hall1_back" value="&lt;b&gt;📢 When Hall 1 recovers:&lt;/b&gt; hall1 pods restart and join the lock-watch loop. hall1/pod-0 becomes the new WARM STANDBY (the role of hall2/pod-0 — they swap roles). NO automatic fail-back. Hall2 remains leader until it&#39;s lost again." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;verticalAlign=middle;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1080" width="1800" height="55" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

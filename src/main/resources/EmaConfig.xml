@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    LSEG EMA Java SDK configuration.
-    See: https://github.com/Refinitiv/Real-Time-SDK/blob/master/Java/Ema/Src/main/resources/EmaConfig.xml
-    The OmmConsumerConfig.consumerName("Consumer_1") in OmmConsumerManager binds to this file.
+    LSEG EMA Java SDK configuration for on-prem TREP / RTDS.
 
-    For RTO (Real-Time Optimized) over the internet, use Channel_RTO with EncryptedProtocolType=RSSL_SOCKET.
-    Service discovery is performed automatically by the SDK using OAuth V2 client credentials.
+    TREP topology (PRODUCTION):
+      - TREP / RTDS exposed via a load balancer with 2 IPs (HA pair).
+      - LB sits in front of 2 backend ADS servers (no hall1/hall2 concept on TREP side).
+      - Both hall1 and hall2 OpenShift clusters connect to the SAME LB endpoints.
+      - LB may fail one IP over to the single remaining IP if a backend ADS dies.
+      - From the client perspective: ChannelSet of (trep-lb-1, trep-lb-2) gives client-side
+        failover if the LB drops an IP. Same DACS session is replayed on the new channel —
+        NO additional DACS login is opened.
+
+    Channel host/port values here are placeholders — the actual endpoints come from
+    application*.yml via OmmConsumerConfig.host() at runtime.
+
+    Reference: EMAJ Configuration Guide §3.4.4 (RSSL_SOCKET) and §3.4.8 (ChannelSet).
 -->
 <EmaConfig>
 
@@ -14,24 +23,64 @@
         <ConsumerList>
             <Consumer>
                 <Name value="Consumer_1"/>
-                <Channel value="Channel_RTO"/>
+                <!--
+                  ChannelSet — EMA attempts Channel_TREP_LB_Primary first; on disconnect
+                  it tries Channel_TREP_LB_Backup. LOGIN domain is replayed automatically
+                  on the new channel using the same DACS credentials.
+                -->
+                <ChannelSet value="Channel_TREP_LB_Primary, Channel_TREP_LB_Backup"/>
                 <Logger value="Logger_File"/>
                 <Dictionary value="Dictionary_1"/>
-                <RestEnableLog value="0"/>
                 <XmlTraceToStdout value="0"/>
-                <!-- Reconnection -->
-                <ReconnectAttemptLimit value="-1"/>          <!-- -1 = unlimited -->
-                <ReconnectMinDelay value="2000"/>            <!-- ms -->
+                <RestEnableLog value="0"/>
+
+                <!-- Reconnection — unlimited attempts with exponential backoff -->
+                <ReconnectAttemptLimit value="-1"/>
+                <ReconnectMinDelay value="2000"/>
                 <ReconnectMaxDelay value="30000"/>
+
                 <RequestTimeout value="15000"/>
                 <ItemCountHint value="500000"/>
+
+                <!-- DACS LOGIN domain timeout -->
+                <LoginRequestTimeOut value="45000"/>
             </Consumer>
         </ConsumerList>
     </ConsumerGroup>
 
     <ChannelGroup>
         <ChannelList>
-            <!-- Refinitiv Real-Time Optimized (cloud) using OAuth V2 client credentials -->
+            <!--
+              Primary TREP LB endpoint — same value used in hall1 and hall2 configmaps.
+              Override via application.yml: marketdata.lseg.ads-host / ads-port.
+            -->
+            <Channel>
+                <Name value="Channel_TREP_LB_Primary"/>
+                <ChannelType value="ChannelType::RSSL_SOCKET"/>
+                <CompressionType value="CompressionType::None"/>
+                <GuaranteedOutputBuffers value="5000"/>
+                <ConnectionPingTimeout value="30000"/>
+                <Host value="trep-lb-1.trep.local"/>
+                <Port value="14002"/>
+                <TcpNodelay value="1"/>
+            </Channel>
+
+            <!--
+              Backup TREP LB endpoint — also the same in both halls.
+              ChannelSet uses this if Primary is unreachable.
+            -->
+            <Channel>
+                <Name value="Channel_TREP_LB_Backup"/>
+                <ChannelType value="ChannelType::RSSL_SOCKET"/>
+                <CompressionType value="CompressionType::None"/>
+                <GuaranteedOutputBuffers value="5000"/>
+                <ConnectionPingTimeout value="30000"/>
+                <Host value="trep-lb-2.trep.local"/>
+                <Port value="14002"/>
+                <TcpNodelay value="1"/>
+            </Channel>
+
+            <!-- RTO cloud channel — only used when marketdata.lseg.connection-mode=RTO_CLOUD -->
             <Channel>
                 <Name value="Channel_RTO"/>
                 <ChannelType value="ChannelType::RSSL_ENCRYPTED"/>
@@ -39,20 +88,8 @@
                 <CompressionType value="CompressionType::None"/>
                 <GuaranteedOutputBuffers value="5000"/>
                 <ConnectionPingTimeout value="30000"/>
-                <EnableSessionManagement value="1"/>          <!-- enables OAuth + service discovery -->
-                <Location value="us-east-1"/>                 <!-- pick region close to deployment -->
-                <ObjectName value=""/>
-            </Channel>
-
-            <!-- Direct RSSL socket (used with on-prem ADS) -->
-            <Channel>
-                <Name value="Channel_RSSL"/>
-                <ChannelType value="ChannelType::RSSL_SOCKET"/>
-                <CompressionType value="CompressionType::None"/>
-                <GuaranteedOutputBuffers value="5000"/>
-                <ConnectionPingTimeout value="30000"/>
-                <Host value="localhost"/>
-                <Port value="14002"/>
+                <EnableSessionManagement value="1"/>
+                <Location value="us-east-1"/>
             </Channel>
         </ChannelList>
     </ChannelGroup>

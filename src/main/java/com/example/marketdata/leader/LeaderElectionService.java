@@ -38,6 +38,9 @@ public class LeaderElectionService {
     private final AtomicReference<LeaderState> state = new AtomicReference<>(LeaderState.STARTING);
     private final PodRole role;
     private final String podName;
+    private final String hall;
+    /** Identity stored in the lock value — includes hall for cross-cluster diagnostics. */
+    private final String lockHolderId;
     private final String lockKey;
     private final int ttlSeconds;
 
@@ -51,16 +54,18 @@ public class LeaderElectionService {
         this.auditRepo = auditRepo;
         this.role = PodRole.fromString(props.getPod().getRole());
         this.podName = props.getPod().getName();
+        this.hall = props.getPod().getHall();
+        this.lockHolderId = hall + "/" + podName;   // e.g. "hall1/market-data-service-0"
         this.lockKey = props.getLeader().getLockKey();
         this.ttlSeconds = props.getLeader().getLockTtlSeconds();
     }
 
     @PostConstruct
     void init() {
-        log.info("LeaderElectionService init: pod={} role={} lockKey={} ttl={}s",
-                podName, role, lockKey, ttlSeconds);
+        log.info("LeaderElectionService init: hall={} pod={} role={} lockKey={} ttl={}s",
+                hall, podName, role, lockKey, ttlSeconds);
         state.set(role == PodRole.COLD_ONLY ? LeaderState.COLD_STANDBY : LeaderState.COMPETING);
-        audit(AuditEventType.POD_STARTED, "role=" + role);
+        audit(AuditEventType.POD_STARTED, "hall=" + hall + " role=" + role);
     }
 
     /**
@@ -76,7 +81,7 @@ public class LeaderElectionService {
             if (isLeader()) {
                 // Renew TTL. If key gone (e.g. Redis flushed), we lost leadership.
                 String current = bucket.get();
-                if (podName.equals(current)) {
+                if (lockHolderId.equals(current)) {
                     bucket.expire(Duration.ofSeconds(ttlSeconds));
                 } else {
                     log.warn("Lost leadership: lock now held by '{}'", current);
@@ -84,7 +89,7 @@ public class LeaderElectionService {
                 }
             } else {
                 // Try to acquire.
-                boolean acquired = bucket.setIfAbsent(podName, Duration.ofSeconds(ttlSeconds));
+                boolean acquired = bucket.setIfAbsent(lockHolderId, Duration.ofSeconds(ttlSeconds));
                 if (acquired) {
                     transitionTo(LeaderState.LEADER, "lock acquired");
                 } else if (state.get() == LeaderState.COMPETING) {
@@ -124,7 +129,7 @@ public class LeaderElectionService {
         try {
             RBucket<String> bucket = redisson.getBucket(lockKey);
             String current = bucket.get();
-            if (podName.equals(current)) {
+            if (lockHolderId.equals(current)) {
                 bucket.delete();
                 log.info("Released leader lock");
             }
@@ -151,4 +156,6 @@ public class LeaderElectionService {
     public LeaderState getState() { return state.get(); }
     public PodRole getRole() { return role; }
     public String getPodName() { return podName; }
+    public String getHall() { return hall; }
+    public String getLockHolderId() { return lockHolderId; }
 }

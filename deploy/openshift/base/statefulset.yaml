@@ -6,8 +6,9 @@ metadata:
     app: market-data-service
 spec:
   serviceName: market-data-service-headless
-  replicas: 4
-  podManagementPolicy: Parallel   # bring all pods up in parallel; leader election sorts them out
+  # 2 replicas per OpenShift cluster (hall1 + hall2 = 4 pods total)
+  replicas: 2
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       app: market-data-service
@@ -33,28 +34,46 @@ spec:
               value: openshift
             - name: POD_NAME
               valueFrom: { fieldRef: { fieldPath: metadata.name } }
-            # Pod role: ordinal 0,1 → warm-eligible; 2,3 → cold-only.
-            # An init container computes this from $POD_NAME and writes /etc/pod-env/POD_ROLE.
+            # Hall identifier (hall1 / hall2) — from the hall-specific ConfigMap
+            - name: HALL
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: hall } }
+            # Pod role: ordinal 0 = warm-eligible, ordinal 1 = cold-only (same in both halls)
             - name: POD_ROLE
               valueFrom: { configMapKeyRef: { name: market-data-service-pod-roles, key: $(POD_NAME) } }
+            # ----- DB -----
             - name: DB_URL
               valueFrom: { secretKeyRef: { name: market-data-service-db, key: url } }
             - name: DB_USER
               valueFrom: { secretKeyRef: { name: market-data-service-db, key: user } }
             - name: DB_PASSWORD
               valueFrom: { secretKeyRef: { name: market-data-service-db, key: password } }
+            # ----- Kafka -----
             - name: KAFKA_BOOTSTRAP
               valueFrom: { configMapKeyRef: { name: market-data-service-config, key: kafka.bootstrap } }
             - name: KAFKA_SASL_JAAS
               valueFrom: { secretKeyRef: { name: market-data-service-kafka, key: sasl-jaas } }
+            # ----- Redis (Enterprise — cross-hall connectivity) -----
             - name: REDIS_CLUSTER_NODES
               valueFrom: { configMapKeyRef: { name: market-data-service-config, key: redis.cluster-nodes } }
             - name: REDIS_PASSWORD
               valueFrom: { secretKeyRef: { name: market-data-service-redis, key: password } }
-            - name: LSEG_CLIENT_ID
-              valueFrom: { secretKeyRef: { name: market-data-service-lseg, key: client-id } }
-            - name: LSEG_CLIENT_SECRET
-              valueFrom: { secretKeyRef: { name: market-data-service-lseg, key: client-secret } }
+            # ----- LSEG (on-prem TREP, DACS auth) -----
+            - name: LSEG_DACS_USERNAME
+              valueFrom: { secretKeyRef: { name: market-data-service-lseg, key: dacs-username } }
+            - name: LSEG_DACS_POSITION
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: lseg.dacs-position } }
+            - name: LSEG_DACS_APPLICATION_ID
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: lseg.dacs-application-id } }
+            - name: LSEG_ADS_HOST
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: lseg.ads-host } }
+            - name: LSEG_ADS_PORT
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: lseg.ads-port } }
+            - name: LSEG_ADS_BACKUP_HOST
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: lseg.ads-backup-host } }
+            - name: LSEG_ADS_BACKUP_PORT
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: lseg.ads-backup-port } }
+            - name: LSEG_SERVICE_NAME
+              valueFrom: { configMapKeyRef: { name: market-data-service-config, key: lseg.service-name } }
             - name: JAVA_OPTS
               value: "-XX:+UseG1GC -XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
           resources:
@@ -75,7 +94,6 @@ spec:
           lifecycle:
             preStop:
               exec:
-                # Give the leader-lock release + EMA close time before SIGKILL
                 command: ["sh", "-c", "sleep 5"]
 ---
 apiVersion: v1

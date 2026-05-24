@@ -68,27 +68,47 @@ redis:
 # ----- Application-specific config -----
 marketdata:
   pod:
-    # Set per-pod from env. Values: warm-eligible | cold-only
+    # OpenShift cluster identifier — "hall1" or "hall2"
+    hall: ${HALL:hall1}
+    # Per-pod role. Values: warm-eligible | cold-only
     role: ${POD_ROLE:warm-eligible}
     # OpenShift downward-api: metadata.name
     name: ${POD_NAME:local-pod}
 
   leader:
+    # GLOBAL lock key shared across both halls via Enterprise Redis — only ONE leader cluster-wide
     lock-key: marketdata:leader:lock
     lock-ttl-seconds: 5
     heartbeat-seconds: 2
     acquire-retry-seconds: 1
 
   lseg:
-    # RTO V2 OAuth2 — store secret in OpenShift Secret
+    # Connection mode: ON_PREM_TREP (RSSL_SOCKET + DACS) or RTO_CLOUD (RSSL_ENCRYPTED + OAuth2)
+    connection-mode: ${LSEG_CONNECTION_MODE:ON_PREM_TREP}
+
+    # ----- DACS auth (used when connection-mode = ON_PREM_TREP) -----
+    # The SAME DACS username is used by ALL pods (per-user licensing).
+    # Each open EMA session counts against this user's MaxLogins.
+    dacs-username: ${LSEG_DACS_USERNAME:}
+    # Position string sent in LOGIN request — set to the static hall egress IP whitelisted at TREP
+    dacs-position: ${LSEG_DACS_POSITION:}
+    dacs-application-id: ${LSEG_DACS_APPLICATION_ID:256}
+    # ADS endpoints for THIS hall (different per hall)
+    ads-host: ${LSEG_ADS_HOST:}
+    ads-port: ${LSEG_ADS_PORT:14002}
+    ads-backup-host: ${LSEG_ADS_BACKUP_HOST:}
+    ads-backup-port: ${LSEG_ADS_BACKUP_PORT:14002}
+
+    # ----- RTO cloud auth (used when connection-mode = RTO_CLOUD) -----
     client-id: ${LSEG_CLIENT_ID:}
     client-secret: ${LSEG_CLIENT_SECRET:}
     token-url: ${LSEG_TOKEN_URL:https://api.refinitiv.com/auth/oauth2/v2/token}
     scope: trapi
+
+    # ----- Common -----
     ema-config-file: classpath:EmaConfig.xml
     consumer-name: Consumer_1
-    service-name: ELEKTRON_DD
-    # If true, skip actually connecting to LSEG (useful for local dev / unit tests)
+    service-name: ${LSEG_SERVICE_NAME:ELEKTRON_DD}
     mock-mode: ${LSEG_MOCK:false}
 
   subscription:
