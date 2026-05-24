@@ -22,6 +22,10 @@ public class SubscriptionAuditEntity {
     @Column(name = "pod_name", nullable = false, length = 64)
     private String podName;
 
+    /** OpenShift cluster identifier — "hall1" or "hall2". Added in V2.1. */
+    @Column(name = "hall", length = 16)
+    private String hall;
+
     @Column(name = "ric", length = 64)
     private String ric;
 

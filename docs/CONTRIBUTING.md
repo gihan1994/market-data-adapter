@@ -52,9 +52,37 @@
 
 ## Adding a database migration
 
-1. Create `src/main/resources/db/migration/V{n}__{description}.sql`
-2. Use only `CREATE`, `ALTER`, never `DROP` of data
-3. Never modify a Flyway-applied migration after it's merged — write a new one
+Migrations are split **one logical change per file** under `src/main/resources/db/migration/`. Naming convention:
+
+```
+V{major}_{minor}__{snake_case_description}.sql
+```
+
+Existing migrations:
+
+| Version | What |
+|---|---|
+| `V1_1` | Create `ric_registry` |
+| `V1_2` | Create `subscription_requests` |
+| `V1_3` | Create `market_data_gaps` |
+| `V1_4` | Create `subscription_audit` |
+| `V2_1` | Add `hall` to `subscription_audit` |
+| `V2_2` | Add `hall` to `market_data_gaps` |
+
+Rules:
+1. Create the file with the next unused version number
+2. Use only `CREATE`, `ALTER` (additive), and `INSERT` of seed data — **never `DROP`** of existing data
+3. Use `IF NOT EXISTS` / `IF EXISTS` for safety
+4. Add `COMMENT ON TABLE` / `COMMENT ON COLUMN` so the schema is self-documenting
+5. Once a migration is merged to `main`, **never modify it** — write a new one to roll forward
+6. Each migration corresponds to one entity or one logical change — don't batch unrelated changes
+
+Verify your migration applies cleanly:
+```bash
+mvn flyway:migrate
+# or
+mvn verify   # Testcontainers spin up a fresh Postgres + apply all migrations
+```
 
 ## Releasing
 

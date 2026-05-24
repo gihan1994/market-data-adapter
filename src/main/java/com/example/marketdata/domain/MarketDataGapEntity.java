@@ -34,6 +34,10 @@ public class MarketDataGapEntity {
     @Column(name = "detected_by", nullable = false, length = 64)
     private String detectedBy;
 
+    /** Hall of the leader that detected this gap. Added in V2.2. */
+    @Column(name = "hall", length = 16)
+    private String hall;
+
     @Column(name = "published", nullable = false)
     private boolean published;
 

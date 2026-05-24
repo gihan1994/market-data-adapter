@@ -143,6 +143,7 @@ public class LeaderElectionService {
         try {
             auditRepo.save(SubscriptionAuditEntity.builder()
                     .podName(podName)
+                    .hall(hall)
                     .eventType(type)
                     .detail(detail)
                     .build());

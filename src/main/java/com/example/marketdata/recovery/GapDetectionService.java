@@ -104,6 +104,7 @@ public class GapDetectionService {
                 .gapEnd(OffsetDateTime.ofInstant(Instant.ofEpochMilli(gap.getGapEndMs()), ZoneOffset.UTC))
                 .durationMs(gap.getDurationMs())
                 .detectedBy(gap.getNewLeaderPod())
+                .hall(props.getPod().getHall())
                 .published(true)
                 .build());
     }

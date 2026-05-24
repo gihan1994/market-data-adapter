@@ -215,7 +215,18 @@ Unchanged from single-cluster design — see **Page 2** of the architecture diag
 
 ### PostgreSQL tables (cross-hall HA)
 
-Same schema as before — see `src/main/resources/db/migration/V1__init.sql`. The DB itself should be deployed with cross-hall replication (e.g., Crunchy Postgres with synchronous standby in hall2).
+Schema is managed by Flyway. One migration per entity, with a `V2` series adding the cross-hall enhancements:
+
+| Migration | Creates / changes |
+|---|---|
+| `V1_1__create_ric_registry.sql` | `ric_registry` table + state CHECK + indexes |
+| `V1_2__create_subscription_requests.sql` | `subscription_requests` table + uniqueness on `(business_ms, ric)` + indexes |
+| `V1_3__create_market_data_gaps.sql` | `market_data_gaps` table + indexes |
+| `V1_4__create_subscription_audit.sql` | `subscription_audit` table + indexes |
+| `V2_1__add_hall_to_audit.sql` | Adds `hall` column + index to `subscription_audit` |
+| `V2_2__add_hall_to_gaps.sql` | Adds `hall` column + index to `market_data_gaps` |
+
+The DB itself should be deployed with cross-hall replication (e.g., Crunchy Postgres with synchronous standby in hall2).
 
 ### Kafka topics (multi-DC)
 

@@ -130,6 +130,7 @@ public class RicRegistryService {
         try {
             auditRepo.save(SubscriptionAuditEntity.builder()
                     .podName(props.getPod().getName())
+                    .hall(props.getPod().getHall())
                     .ric(ric).eventType(type).detail(detail).build());
         } catch (Exception ignored) { /* don't fail flow on audit issue */ }
     }

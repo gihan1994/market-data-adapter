@@ -175,6 +175,7 @@ public class LsegAuthService {
         try {
             auditRepo.save(SubscriptionAuditEntity.builder()
                     .podName(props.getPod().getName())
+                    .hall(props.getPod().getHall())
                     .eventType(type)
                     .detail(detail)
                     .build());
